@@ -1,0 +1,212 @@
+* { /* 전체 요소: 마진, 패딩 초기화 및 테두리 포함 크기 계산 */ margin: 0; padding: 0; box-sizing: border-box; }
+body { /* 전체 페이지 배경 및 기본 폰트 설정 */ background: #fff; font-family: -apple-system, BlinkMacSystemFont, sans-serif; }
+
+/* ── 상단 네비게이션바 ── */
+.dp-nav {
+  /* 상단 고정 네비게이션 래퍼 */
+  position: sticky; top: 0; z-index: 100;
+  background: #fff; border-bottom: 1px solid rgba(0,0,0,.08);
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 40px; height: 60px;
+}
+.dp-nav__logo { /* 네비게이션 우측 로고 이미지 래퍼 */ overflow: hidden; height: 52px; display: flex; align-items: center; position: absolute; right: 0; top: 50%; transform: translateY(-50%); }
+.dp-nav__logo img { /* 네비게이션 우측 로고 이미지 자체 */ height: 300px; width: auto; display: block; flex-shrink: 0; }
+@media (max-width: 768px) {
+  .dp-nav { /* 모바일 상단 네비게이션 패딩 조정 */ padding: 0 16px; overflow: hidden; }
+  .dp-nav__logo { /* 모바일 네비게이션 로고 크기 및 위치 조정 */ width: 52px; right: 0; }
+}
+.dp-nav__back {
+  /* 네비게이션 좌측 '뒤로가기' 버튼 */
+  display: flex; align-items: center; gap: 8px;
+  color: #1A3DEE; font-size: 13px; font-weight: 600;
+  text-decoration: none; letter-spacing: .04em;
+}
+.dp-nav__back:hover { /* 뒤로가기 버튼 호버 시 투명도 조절 */ opacity: .7; }
+.dp-nav__back svg { /* 뒤로가기 버튼 내 화살표 아이콘 */ width: 16px; height: 16px; }
+
+/* ── 메인 컨텐츠 영역 ── */
+.dp-body { /* 메인 컨텐츠를 감싸는 중앙 정렬 래퍼 */ max-width: 800px; margin: 0 auto; }
+.dp-body img { /* 본문 내 이미지 가로 폭을 영역에 맞춤 */ display: block; width: 100%; height: auto; }
+
+/* ── 우측 플로팅 네비게이션 (스크롤 스파이) ── */
+.dp-nav-side {
+  /* 화면 우측 중앙에 고정되는 네비게이션 래퍼 */
+  position: fixed;
+  right: 20px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  align-items: flex-end;
+  background: rgba(255,255,255,0.85);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border-radius: 12px;
+  padding: 10px 12px;
+  box-shadow: 0 2px 16px rgba(0,0,0,.1);
+}
+.dp-nav-side__item {
+  /* 우측 네비게이션의 개별 항목(버튼) */
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  padding: 5px 2px;
+  transition: all .2s;
+}
+.dp-nav-side__label {
+  /* 우측 네비게이션 항목의 텍스트 라벨 (기본 숨김/흐림 처리) */
+  font-size: 13px;
+  font-weight: 600;
+  color: #888;
+  letter-spacing: .02em;
+  white-space: nowrap;
+  transition: color .2s;
+}
+.dp-nav-side__dot {
+  /* 우측 네비게이션 항목의 동그란 점 표시 */
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #ccc;
+  transition: all .2s;
+  flex-shrink: 0;
+}
+.dp-nav-side__item:hover .dp-nav-side__label { /* 항목 호버 시 텍스트 파란색으로 변경 */ color: #1A3DEE; }
+.dp-nav-side__item:hover .dp-nav-side__dot { /* 항목 호버 시 점 크기 확대 및 파란색으로 변경 */ background: #1A3DEE; transform: scale(1.3); }
+.dp-nav-side__item.is-active .dp-nav-side__dot { /* 현재 스크롤 위치와 일치하는(활성화된) 항목의 점 스타일 */ background: #1A3DEE; width: 9px; height: 9px; }
+.dp-nav-side__item.is-active .dp-nav-side__label { /* 활성화된 항목의 텍스트 스타일 */ color: #1A3DEE; font-weight: 800; }
+.dp-nav-side__item--cta { /* 우측 네비게이션 맨 하단 '문의하기' 등 강조 항목 래퍼 */ margin-top: 6px; border-top: 1px solid #eee; padding-top: 10px; }
+.dp-nav-side__item--cta .dp-nav-side__label { /* 우측 강조 항목의 텍스트 스타일 */ color: #1A3DEE; font-weight: 700; }
+.dp-nav-side__item--cta .dp-nav-side__dot { /* 우측 강조 항목의 점 스타일 */ background: #1A3DEE; }
+.dp-nav-side__item--cta:hover .dp-nav-side__label { /* 우측 강조 항목 호버 스타일 */ opacity: .7; }
+@media (max-width: 768px) {
+  .dp-nav-side { /* 모바일 우측 네비게이션 위치 및 여백 조정 */ right: 8px; padding: 8px 10px; gap: 2px; }
+  .dp-nav-side__label { /* 모바일 우측 네비게이션 텍스트 크기 축소 */ font-size: 11px; }
+}
+
+/* ── 하단 CTA(Call to Action) ── */
+.dp-cta {
+  /* 페이지 하단 액션 유도(문의하기 등) 전체 영역 */
+  background: #1A3DEE; padding: 60px 40px; text-align: center;
+}
+.dp-cta p { /* CTA 영역 안내 텍스트 */ color: rgba(255,255,255,.75); font-size: 16px; margin-bottom: 24px; }
+.dp-cta button {
+  /* CTA 영역 하얀색 클릭 버튼 */
+  display: inline-block; background: #fff; color: #1A3DEE;
+  font-size: 18px; font-weight: 800; padding: 18px 48px; border-radius: 6px;
+  border: none; cursor: pointer; letter-spacing: -.01em; transition: opacity .15s;
+  font-family: inherit;
+}
+.dp-cta button:hover { /* CTA 버튼 호버 시 투명도 적용 */ opacity: .85; }
+
+/* ── 문의 모달(팝업창) ── */
+.cmod-overlay {
+  /* 화면 전체를 덮는 모달 반투명 배경 */
+  display: none; position: fixed; inset: 0; z-index: 9999;
+  background: rgba(0,0,0,.7); align-items: center; justify-content: center;
+  padding: 16px; backdrop-filter: blur(6px); overflow-y: auto;
+}
+.cmod-overlay.open { /* 모달이 열렸을 때 보이게 하는 클래스 */ display: flex; }
+.cmod-wrap {
+  /* 모달 내부 컨텐츠 래퍼(단일 폼 또는 이미지 포함 확장 형태) */
+  display: flex; align-items: stretch; margin: auto;
+  max-width: 600px; width: 100%; border-radius: 16px;
+  transition: max-width .4s cubic-bezier(.2,.7,.2,1); gap: 20px;
+}
+.cmod-wrap.plan-open { /* 좌측에 요금제 이미지 등이 추가로 열렸을 때 전체 폭 확장 */ max-width: 1120px; }
+.cmod-box {
+  /* 실제 문의 폼이 들어가는 우측 하얀색 박스 */
+  background: #fafaf8; border-radius: 16px; flex: 0 0 580px; min-width: 0;
+  overflow-y: auto; max-height: 90vh; box-shadow: 0 24px 80px rgba(0,0,0,.3);
+}
+.cmod-plan-panel {
+  /* 모달 확장 시 왼쪽에 나타나는 이미지 패널 영역 */
+  flex: 1; min-width: 0; overflow: hidden; border-radius: 16px;
+  box-shadow: 0 24px 80px rgba(0,0,0,.25); display: none;
+}
+.cmod-wrap.plan-open .cmod-plan-panel { /* 확장 상태에서 왼쪽 패널 표시 */ display: block; }
+.cmod-plan-panel img { /* 패널 내부 이미지 꽉 차게 표시 */ width: 100%; height: 100%; object-fit: cover; object-position: top; display: block; }
+.cmod-budget-head { /* 예산 선택 버튼 상단 제목과 요금표 버튼을 감싸는 영역 */ display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+.cmod-plan-btn {
+  /* 예산 필드 우측 상단 '단가표 보기' 버튼 */
+  background: none; border: 1.5px solid #1A3DEE; border-radius: 20px;
+  padding: 4px 12px; font-size: 12px; font-weight: 700; color: #1A3DEE;
+  cursor: pointer; letter-spacing: .03em; transition: all .15s; font-family: inherit;
+}
+.cmod-plan-btn:hover { /* 단가표 보기 버튼 호버 시 색상 반전 */ background: #1A3DEE; color: #fff; }
+.cmod-head {
+  /* 모달 최상단 헤더(제목 및 닫기 버튼 포함) 영역 */
+  padding: 36px 36px 24px; display: flex; justify-content: space-between;
+  align-items: flex-start; border-bottom: 1px solid #eee;
+}
+.cmod-tag { /* 모달 상단 'PROJECT INQUIRY' 등의 파란색 작은 태그 */ font-size: 10px; letter-spacing: .1em; color: #1A3DEE; font-weight: 700; text-transform: uppercase; margin-bottom: 4px; }
+.cmod-title { /* 모달 상단 큰 제목 */ font-size: 24px; font-weight: 800; color: #0a0a0a; letter-spacing: -.04em; margin-bottom: 6px; }
+.cmod-sub { /* 모달 상단 부제목 및 안내 텍스트 */ font-size: 13px; color: #888; }
+.cmod-close { /* 모달 우측 상단 X(닫기) 버튼 */ background: none; border: none; font-size: 20px; cursor: pointer; color: #bbb; padding: 0; line-height: 1; flex-shrink: 0; margin-top: 4px; }
+.cmod-close:hover { /* 닫기 버튼 호버 색상 */ color: #0a0a0a; }
+.cmod-form { /* 모달 내부 입력 폼 전체 영역 */ padding: 28px 36px 36px; display: flex; flex-direction: column; gap: 18px; }
+.cmod-field { /* 각각의 입력 항목(라벨 + 인풋)을 감싸는 래퍼 */ display: flex; flex-direction: column; gap: 7px; }
+.cmod-field > label { /* 각 입력 항목의 라벨(이름, 연락처 등) */ font-size: 11px; font-weight: 700; color: #555; letter-spacing: .06em; text-transform: uppercase; }
+.req { /* 필수 입력 항목 옆에 붙는 파란색 '*' 표시 */ color: #1A3DEE; }
+.cmod-row2 { /* 두 개의 입력 필드를 가로로 나란히 배치하기 위한 그리드 */ display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.cmod-form input, .cmod-form textarea, .cmod-form select {
+  /* 공통 입력 필드(인풋, 텍스트에어리어, 셀렉트박스) 스타일 */
+  border: 1.5px solid #e5e5e5; border-radius: 8px; padding: 11px 14px;
+  font-size: 14px; color: #0a0a0a; outline: none; transition: border-color .15s;
+  font-family: inherit; background: #fff;
+}
+.cmod-form input:focus, .cmod-form textarea:focus, .cmod-form select:focus {
+  /* 입력 필드 활성화(포커스) 시 파란색 테두리 및 그림자 효과 */
+  border-color: #1A3DEE; box-shadow: 0 0 0 3px rgba(26,61,238,.08);
+}
+.cmod-phone { /* 연락처 입력을 3칸으로 나누는 래퍼 */ display: flex; align-items: center; gap: 6px; }
+.cmod-phone input { /* 연락처 3칸 입력란 */ width: 80px; text-align: center; }
+.cmod-phone span { /* 연락처 입력란 사이의 '-' 하이픈 */ color: #aaa; font-size: 16px; }
+.cmod-budget-btns { /* 예산 선택 버튼들을 모아두는 래퍼 */ display: flex; flex-wrap: wrap; gap: 8px; margin-top: 2px; }
+.cmod-budget-btn {
+  /* 예산 선택 버튼 (라디오 버튼 대신 사용) */
+  padding: 10px 18px; border: 1.5px solid #e5e5e5; border-radius: 8px;
+  background: #fff; color: #555; font-size: 14px; font-weight: 500;
+  cursor: pointer; transition: all .15s; font-family: inherit;
+}
+.cmod-budget-btn:hover { /* 예산 선택 버튼 호버 시 파란색 테두리/글씨 */ border-color: #1A3DEE; color: #1A3DEE; }
+.cmod-budget-btn--on { /* 선택된 예산 버튼의 활성화 상태(파란 배경) */ background: #1A3DEE; border-color: #1A3DEE; color: #fff; font-weight: 700; }
+.cmod-form textarea { /* 다중 줄 입력 필드 높이 및 사이즈 조절 허용 */ resize: vertical; min-height: 90px; }
+.cmod-submit {
+  /* 폼 최하단 폼 전송/제출 버튼 */
+  background: #0a0a0a; color: #fff; border: none; border-radius: 8px; padding: 16px;
+  font-size: 15px; font-weight: 700; cursor: pointer; transition: background .15s;
+  margin-top: 4px; letter-spacing: -.01em; font-family: inherit; width: 100%;
+}
+.cmod-submit:hover { /* 폼 제출 버튼 호버 시 파란색으로 변경 */ background: #1A3DEE; }
+.cmod-note { /* 폼 제출 버튼 하단 안내 문구 */ font-size: 11px; color: #bbb; text-align: center; }
+.cmod-done { /* 제출 완료 시 나타나는 완료 화면 영역 */ padding: 56px 36px; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 16px; }
+.cmod-done-icon { /* 완료 화면 중앙 파란색 체크 아이콘 래퍼 */ width: 56px; height: 56px; border-radius: 50%; background: #1A3DEE; color: #fff; font-size: 22px; display: flex; align-items: center; justify-content: center; }
+.cmod-done h4 { /* 완료 화면 제목 텍스트 */ font-size: 20px; font-weight: 800; color: #0a0a0a; letter-spacing: -.03em; }
+.cmod-done p { /* 완료 화면 상세 문구 */ font-size: 14px; color: #666; line-height: 1.7; }
+@media (max-width: 640px) {
+  /* 모바일 화면 해상도 대응 레이아웃 변경 */
+  .dp-nav { /* 모바일 상단바 여백 */ padding: 0 16px; overflow: hidden; }
+  .dp-nav__logo { /* 모바일 상단 로고 컨테이너 폭 */ width: 52px; }
+  .dp-nav__logo img { /* 모바일 상단 로고 높이 */ height: 200px; }
+  .dp-body { /* 모바일 메인 컨텐츠 영역 전체 폭 사용 */ max-width: 100%; }
+  .dp-cta { /* 모바일 하단 CTA 배너 여백 축소 */ padding: 40px 20px; }
+  .cmod-overlay { /* 모바일 모달 배경 패딩 제거 및 팝업 하단에 붙이기 */ padding: 0; align-items: flex-end; }
+  .cmod-wrap { /* 모바일 모달 팝업 가로폭 전체 사용 및 상단 라운드 처리 */ max-width: 100% !important; width: 100%; border-radius: 20px 20px 0 0; flex-direction: column; gap: 0; max-height: 95vh; overflow-y: auto; }
+  .cmod-box { /* 모바일 문의 폼 박스 그림자 제거 및 상단 라운드 */ flex: none; border-radius: 20px 20px 0 0; max-height: none; overflow-y: visible; box-shadow: none; }
+  .cmod-plan-panel { /* 모바일 이미지 패널 위치 아래로 이동 및 라운드 제거 */ display: block !important; flex: none; border-radius: 0; box-shadow: none; order: 2; }
+  .cmod-plan-panel img { /* 모바일 패널 이미지 폭 100% */ width: 100%; height: auto; display: block; }
+  .cmod-head { /* 모바일 모달 상단 헤더 패딩 축소 */ padding: 28px 20px 20px; }
+  .cmod-form { /* 모바일 폼 내부 여백 축소 */ padding: 20px 20px 36px; gap: 16px; }
+  .cmod-row2 { /* 두 칸 필드를 한 줄로 변경 */ grid-template-columns: 1fr; }
+  .cmod-title { /* 모바일 제목 크기 축소 */ font-size: 22px; }
+  .cmod-field > label { /* 모바일 라벨 폰트 크기 확대 */ font-size: 12px; }
+  .cmod-form input, .cmod-form textarea, .cmod-form select { /* 터치 편의성을 위해 모바일 인풋 크기 확대 */ font-size: 16px; padding: 13px 14px; }
+  .cmod-budget-btns { /* 모바일 예산 버튼 여백 */ gap: 8px; }
+  .cmod-budget-btn { /* 터치 편의를 위한 예산 버튼 패딩 조정 */ padding: 12px 16px; font-size: 14px; }
+  .cmod-submit { /* 제출 버튼 모바일 패딩 및 글씨 강조 */ padding: 18px; font-size: 16px; font-weight: 800; }
+  .cmod-plan-btn { /* 단가표 보기 버튼 모바일 패딩 축소 */ font-size: 13px; padding: 6px 14px; }
+}
