@@ -98,12 +98,12 @@ back/
   ├ .env
   ├ config
   │   └ api_urls.py
-  ├ accounts                  로그인, 회원가입
+  ├ account                   로그인, 회원가입
   ├ schedule                  스케쥴 관리
   ├ notice                    관리자 개시글
   ├ space                     관리자 작업공간
-  ├ works                     포트폴리오
-  ├ products                  상품 등록, 조회 관리
+  ├ work                      포트폴리오
+  ├ product                   상품 등록, 조회 관리
   ├ community                 고객-관리자 간 상담 및 문의
   ├ inquiry                   관리자-개발자 간 시스템 문의
   └ system                    시스템 전역 설정 (집중 모드 등)
@@ -112,12 +112,12 @@ fornt/
   ├ .env
   ├ pages/
   │   ├ index.vue
-  │   ├ accounts/
+  │   ├ account/
   │   ├ schedule/
   │   ├ notice/
   │   ├ space/
-  │   ├ works/
-  │   ├ products/
+  │   ├ work/
+  │   ├ product/
   │   ├ community/
   │   └ inquiry/
   │
@@ -128,7 +128,7 @@ fornt/
   │
   └ components/
       ├ common/                 공통 레이아웃
-      └ products/
+      └ product/
 ```
 
 ## 데이터 테이블
