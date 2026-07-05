@@ -67,6 +67,15 @@
         </div>
       </div>
       <CommonTicker></CommonTicker>
+      
+      <!-- 새로 추가된 Service 섹션 -->
+      <CommonServiceSection />
+
+      <!-- 새로 추가된 Stats 섹션 -->
+      <CommonStatsSection />
+
+      <!-- 새로 추가된 About 섹션 -->
+      <CommonAboutSection />
     </div>
     
   </div>

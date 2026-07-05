@@ -136,7 +136,6 @@ fornt/
 ### accounts
 
 #### User
-
 |Column|Type|Foreign|Notice|
 |:---:|:---:|:---:|:---:|
 |pk|int|||
@@ -146,104 +145,97 @@ fornt/
 |phone_number|CharField|||
 
 #### UserInfo
-
 |Column|Type|Foreign|Notice|
 |:---:|:---:|:---:|:---:|
 |pk|int|||
 |user_id|foreign|User||
+|company_name|CharField||회사명|
+|manager|CharField||담당자명|
+|company_address|CharField||회사 주소|
 |authority|Bool|||
 |is_staff|Bool|||
-|production|foreign|Products/Product||
+|production|foreign|Products/Plan||
 
 ### Works
 
-#### Work
-
+#### Category
 |Column|Type|Foreign|Notice|
 |:---:|:---:|:---:|:---:|
 |pk|int|||
-|title|CharField|||
+|name|CharField||카테고리명|
+|subtitle|CharField||카테고리 부제목|
+|order|int||노출 순서|
+|is_vertical|Bool||세로형(쇼츠) 여부|
+
+#### Work
+|Column|Type|Foreign|Notice|
+|:---:|:---:|:---:|:---:|
+|pk|int|||
+|category_id|foreign|Category|카테고리 분류|
+|user_id|foreign|User|관련 고객|
+|title|CharField||작품명|
 |youtube_link|URLField||영상 링크|
 |content|TextField||게시글 내용|
+|status|CharField||진행 상태 (작업중/완료됨)|
 |is_visible|Bool||공개 여부|
 |created_at|DateTimeField||auto_now_add|
 |updated_at|DateTimeField||auto_now|
 
+#### BrandClient
+|Column|Type|Foreign|Notice|
+|:---:|:---:|:---:|:---:|
+|pk|int|||
+|name|CharField||브랜드명|
+|subtitle|CharField||부가설명|
+|created_at|DateTimeField||auto_now_add|
+
+#### Project
+|Column|Type|Foreign|Notice|
+|:---:|:---:|:---:|:---:|
+|pk|int|||
+|title|CharField||프로젝트명|
+|subtitle|CharField||부가설명|
+|client_id|foreign|BrandClient|관련 브랜드 클라이언트|
+|created_at|DateTimeField||auto_now_add|
+
+#### Inquiry
+|Column|Type|Foreign|Notice|
+|:---:|:---:|:---:|:---:|
+|pk|int|||
+|title|CharField||문의 제목|
+|name|CharField||고객 성함|
+|company|CharField||회사명|
+|phone|CharField||연락처|
+|email|EmailField||이메일|
+|category|CharField||문의 카테고리|
+|budget|CharField||예산|
+|details|TextField||상세 요청사항|
+|created_at|DateTimeField||접수일자|
+|is_read|Bool||관리자 읽음 여부|
+|status|CharField||처리 상태 (미접수/처리 중/처리 완료)|
+
 ### Products
 
-#### Product
-
+#### Plan (요금제)
 |Column|Type|Foreign|Notice|
 |:---:|:---:|:---:|:---:|
 |pk|int|||
-|name|CharField||구독 상품명|
-|description|TextField||상품 설명|
-|price|int||가격|
-|is_active|Bool||개별 판매 여부 (True/False)|
+|plan_type|CharField||플랜 종류 (BASIC, GROWTH)|
+|name|CharField||플랜명|
+|subname|CharField||서브명|
+|price|int||가격(만원)|
+|recommends|ManyToMany|Recommend|추천 대상|
+|operations|ManyToMany|Operation|운영 목적|
+|productions|ManyToMany|Production|촬영/편수|
+|items|ManyToMany|Item|제작 항목|
 |created_at|DateTimeField||auto_now_add|
 |updated_at|DateTimeField||auto_now|
 
-### Space
-
-#### Workspace
-
+#### Recommend / Operation / Production / Item
 |Column|Type|Foreign|Notice|
 |:---:|:---:|:---:|:---:|
 |pk|int|||
-|title|CharField||작업공간 명|
-|description|TextField||작업 내용|
-|status|CharField||진행 상태|
-|created_at|DateTimeField||auto_now_add|
-|updated_at|DateTimeField||auto_now|
-
-### Schedule
-
-#### ScheduleEvent
-
-|Column|Type|Foreign|Notice|
-|:---:|:---:|:---:|:---:|
-|pk|int|||
-|title|CharField||일정 명|
-|start_date|DateTimeField||시작일|
-|end_date|DateTimeField||종료일|
-|description|TextField||일정 설명|
-
-### Community
-
-#### CustomerInquiry
-
-|Column|Type|Foreign|Notice|
-|:---:|:---:|:---:|:---:|
-|pk|int|||
-|user_id|foreign|User||
-|title|CharField||고객 문의 제목|
-|content|TextField||고객 문의 내용|
-|status|CharField||답변 상태 (대기/완료)|
-|created_at|DateTimeField||auto_now_add|
-
-### Inquiry
-
-#### SystemIssue
-
-|Column|Type|Foreign|Notice|
-|:---:|:---:|:---:|:---:|
-|pk|int|||
-|admin_id|foreign|User||
-|title|CharField||시스템 이슈 제목|
-|content|TextField||이슈 및 버그 내용|
-|status|CharField||해결 상태 (대기/진행/완료)|
-|created_at|DateTimeField||auto_now_add|
-
-### System
-
-#### SystemSetting
-
-|Column|Type|Foreign|Notice|
-|:---:|:---:|:---:|:---:|
-|pk|int|||
-|focus_mode_active|Bool||서비스 집중기간 여부|
-|hide_products|Bool||전체 프로덕트 강제 숨김 (전역 설정)|
-|block_inquiries|Bool||전체 문의 강제 차단 (전역 설정)|
+|name|CharField||항목 이름|
 
 
 &emsp;

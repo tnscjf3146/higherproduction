@@ -155,10 +155,10 @@ STATIC_ROOT = BASE_DIR / 'staticfiles'
 from datetime import timedelta
 
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),  # Access 토큰 만료 시간
-    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),     # Refresh 토큰 만료 시간
-    'ROTATE_REFRESH_TOKENS': True,                  # Refresh 토큰 사용 시 새 토큰 발급 여부
-    'BLACKLIST_AFTER_ROTATION': True,               # 이전 Refresh 토큰을 블랙리스트에 올릴지 여부
+    'ACCESS_TOKEN_LIFETIME': timedelta(hours=3),     # Access 토큰 만료 시간 (3시간)
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=7),     # Refresh 토큰 만료 시간 (7일)
+    'ROTATE_REFRESH_TOKENS': True,
+    'BLACKLIST_AFTER_ROTATION': True,
     'ALGORITHM': 'HS256',
     'SIGNING_KEY': SECRET_KEY,
     'AUTH_HEADER_TYPES': ('Bearer',),
@@ -172,3 +172,6 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.IsAuthenticated', # 기본적으로 로그인한 유저만 허용하되, 비인증 허용할 뷰만 개별 지정
     )
 }
+
+# 이메일 발송을 개발용 콘솔로 출력하도록 임시 설정
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'

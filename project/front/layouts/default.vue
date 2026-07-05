@@ -36,7 +36,9 @@
     <!-- 상단 공통 네비게이션 자리 -->
     <div class="nav">
       <div class="nav-left">
-        <img src="/nav_logo_en.png" alt="logo" class="nav-logo-img">
+        <NuxtLink to="/">
+          <img src="/nav_logo_en.png" alt="logo" class="nav-logo-img">
+        </NuxtLink>
       </div>
       
       <div class="nav-center">
@@ -78,22 +80,29 @@
 
     <slot />
 
-    <!-- 하단 공통 푸터 자리 -->
+    <!-- 하단 공통 푸터 -->
+    <Footer />
   </div>
 </template>
 
 <script setup>
 import { ref, computed } from 'vue'
+import { useRouter } from 'vue-router'
+import { useAuthStore } from '~/stores/auth'
+import Footer from '~/components/common/Footer.vue'
 
+const authStore = useAuthStore()
+const router = useRouter()
 const isMenuOpen = ref(false)
 
 const toggleMenu = () => {
   isMenuOpen.value = !isMenuOpen.value
 }
 
-// 🚀 임시 로그인 및 관리자 상태 (추후 상태관리 라이브러리 연동)
-const isLoggedIn = ref(true) // 일반 로그인 상태
-const isAdmin = ref(true)    // 관리자 권한 여부
+// 스토어의 유저 정보 유무로 로그인 상태 자동 계산
+const isLoggedIn = computed(() => !!authStore.user) 
+// 백엔드에서 전달받은 is_admin 값을 바탕으로 관리자 권한 연동
+const isAdmin = computed(() => authStore.user?.is_admin || false)    
 
 // 🚀 인증(Auth) 관련 메뉴 (로그인/로그아웃/프로필) 배열 관리
 const authItems = computed(() => {
@@ -104,8 +113,8 @@ const authItems = computed(() => {
     ]
   }
   return [
-    { name: 'LOGIN', path: '/login' },
-    { name: 'SIGN UP', path: '/signup' }
+    { name: 'LOGIN', path: '/account/login' },
+    { name: 'SIGN UP', path: '/account/signup' }
   ]
 })
 
@@ -113,7 +122,9 @@ const authItems = computed(() => {
 const handleAuthClick = (event, path, isMobile) => {
   if (path === '#logout') {
     event.preventDefault() // 기본 링크 이동 막기
-    isLoggedIn.value = false // 로그아웃 처리
+    authStore.logout()     // Pinia Auth Store 로그아웃 실행
+    alert('로그아웃 되었습니다.')
+    router.push('/account/login') // 로그아웃 후 로그인 페이지로 리다이렉트
   }
   if (isMobile) {
     toggleMenu() // 모바일 메뉴면 클릭 시 닫기
@@ -130,7 +141,7 @@ const publicMenuItems = [
 
 // 2. 관리자 전용 메뉴
 const adminMenuItems = [
-  { name: 'EDIT', path: '/admin' }
+  { name: 'EDIT', path: '/edit' }
 ]
 
 // 3. 화면에 최종적으로 뿌려질 메뉴 리스트 (자동 계산)

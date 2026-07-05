@@ -22,8 +22,10 @@
 </script>
 
 <style scoped>
-/* 티커 전체 영역 (바깥으로 나가는 글자를 숨김) */
+/* 가장 바깥쪽: 넘치는 텍스트를 숨겨주는 창문 역할 */
 .ticker-wrap {
+  position: relative;
+  z-index: 10;
   width: 100%;
   overflow: hidden;
   background-color: var(--primary-color); /* 파란색 배경 */
