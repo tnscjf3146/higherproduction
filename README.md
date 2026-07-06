@@ -236,7 +236,32 @@ fornt/
 |:---:|:---:|:---:|:---:|
 |pk|int|||
 |name|CharField||항목 이름|
+### System
 
+#### SiteSetting
+|Column|Type|Foreign|Notice|
+|:---:|:---:|:---:|:---:|
+|pk|int|||
+|logo_kr|CharField||국문 로고 텍스트/경로|
+|logo_en|CharField||영문 로고 텍스트/경로|
+|about_headings|JSONField||About 섹션 제목 리스트 (텍스트, 강조 여부)|
+|email|EmailField||스튜디오 이메일|
+|phone|CharField||스튜디오 전화번호|
+|address|CharField||스튜디오 주소|
+|instagram_handle|CharField||인스타그램 핸들 (예: @higher.production)|
+|instagram_url|URLField||인스타그램 주소 (URL)|
+|contact_title|CharField||Contact 페이지 타이틀|
+|is_service_visible|BooleanField||Service 섹션 노출 여부|
+|service_title|CharField||Service 섹션 메인 타이틀|
+|service_desc|CharField||Service 섹션 서브 설명|
+|is_about_visible|BooleanField||About 섹션 노출 여부|
+|about_title|CharField||About 섹션 메인 타이틀|
+|about_desc|CharField||About 섹션 서브 설명|
+|is_contact_visible|BooleanField||Contact(Footer) 섹션 노출 여부|
+|contact_header_title|CharField||Contact 섹션 메인 타이틀|
+|contact_header_desc|CharField||Contact 섹션 서브 설명|
+|footer_slogan_main|JSONField||푸터 메인 슬로건 (문장 리스트)|
+|footer_slogan_sub|CharField||푸터 서브 슬로건|
 
 &emsp;
 

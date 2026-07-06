@@ -9,6 +9,31 @@ const projects = ref([])
 const works = ref([])
 const categories = ref([])
 const inquiries = ref([])
+const siteSetting = ref({ 
+  logo_kr: '', 
+  logo_en: '', 
+  about_headings: [
+    { text: '브랜드의 고도를 높이는', is_highlighted: false },
+    { text: '우상향 프로덕션', is_highlighted: false }
+  ],
+  email: '',
+  phone: '',
+  address: '',
+  instagram_handle: '',
+  instagram_url: '',
+  contact_title: '',
+  footer_slogan_main: ["당신의 브랜드,", "한 단계 더 위로"],
+  footer_slogan_sub: '',
+  is_service_visible: true,
+  service_title: 'MONTHLY PLAN',
+  service_desc: '영상 운영 가격 / 한달 기준',
+  is_about_visible: true,
+  about_title: 'ABOUT THE STUDIO',
+  about_desc: '하이어, 더 높은 곳으로',
+  is_contact_visible: true,
+  contact_header_title: 'GET IN TOUCH',
+  contact_header_desc: '하이어, 더 높은 곳으로'
+})
 
 // 폼 상태
 const formBc = ref({ name: '', subtitle: '' })
@@ -70,6 +95,52 @@ const loadInquiries = async () => {
     inquiries.value = await $fetch('http://127.0.0.1:8000/work/inquiries/')
   } catch (e) { console.error(e) }
 }
+const loadSiteSetting = async () => {
+  try {
+    const data = await $fetch('http://127.0.0.1:8000/system/settings/')
+    let headings = data.about_headings
+    if (!headings || headings.length === 0) {
+      headings = [
+        { text: '브랜드의 고도를 높이는', is_highlighted: false },
+        { text: '우상향 프로덕션', is_highlighted: false }
+      ]
+    }
+    siteSetting.value = { 
+      logo_kr: data.logo_kr || '', 
+      logo_en: data.logo_en || '',
+      about_headings: headings,
+      email: data.email || 'higher3pd@gmail.com',
+      phone: data.phone || '+82 10-3313-0388',
+      address: data.address || '경기도 의정부시, KR',
+      instagram_handle: data.instagram_handle || '@higher.production',
+      instagram_url: data.instagram_url || 'https://instagram.com/higher.production',
+      contact_title: data.contact_title || "LET'S GO HIGHER",
+      footer_slogan_main: Array.isArray(data.footer_slogan_main) ? data.footer_slogan_main : ["당신의 브랜드,", "한 단계 더 위로"],
+      footer_slogan_sub: data.footer_slogan_sub || "Let's go higher.",
+      is_service_visible: data.is_service_visible ?? true,
+      service_title: data.service_title || 'MONTHLY PLAN',
+      service_desc: data.service_desc || '영상 운영 가격 / 한달 기준',
+      is_about_visible: data.is_about_visible ?? true,
+      about_title: data.about_title || 'ABOUT THE STUDIO',
+      about_desc: data.about_desc || '하이어, 더 높은 곳으로',
+      is_contact_visible: data.is_contact_visible ?? true,
+      contact_header_title: data.contact_header_title || 'GET IN TOUCH',
+      contact_header_desc: data.contact_header_desc || '하이어, 더 높은 곳으로'
+    }
+  } catch (e) { console.error(e) }
+}
+
+const addAboutHeading = () => {
+  siteSetting.value.about_headings.push({ text: '', is_highlighted: false })
+}
+
+const removeAboutHeading = (index) => {
+  if (siteSetting.value.about_headings.length > 1) {
+    siteSetting.value.about_headings.splice(index, 1)
+  } else {
+    alert('최소 한 줄은 필요합니다.')
+  }
+}
 
 onMounted(() => {
   loadBrandClients()
@@ -77,6 +148,7 @@ onMounted(() => {
   loadWorks()
   loadCategories()
   loadInquiries()
+  loadSiteSetting()
 })
 
 // 추가 함수들
@@ -417,6 +489,20 @@ const updateInquiryStatus = async (inq) => {
     loadInquiries()
   }
 }
+
+// 사이트 설정 저장
+const saveSiteSetting = async () => {
+  try {
+    await $fetch('http://127.0.0.1:8000/system/settings/', {
+      method: 'PATCH',
+      body: siteSetting.value
+    })
+    alert('사이트 설정이 성공적으로 저장되었습니다.')
+  } catch (e) {
+    console.error(e)
+    alert('사이트 설정 저장에 실패했습니다.')
+  }
+}
 </script>
 
 <template>
@@ -431,6 +517,7 @@ const updateInquiryStatus = async (inq) => {
           <li :class="{ active: activeTab === 'category' }" @click="activeTab = 'category'">카테고리 관리</li>
           <li :class="{ active: activeTab === 'work' }" @click="activeTab = 'work'">최종 영상 (Works)</li>
           <li :class="{ active: activeTab === 'inquiry' }" @click="activeTab = 'inquiry'">문의 내역 관리</li>
+          <li :class="{ active: activeTab === 'siteSetting' }" @click="activeTab = 'siteSetting'">사이트 설정</li>
         </ul>
       </aside>
 
@@ -833,6 +920,172 @@ const updateInquiryStatus = async (inq) => {
           </div>
         </div>
 
+        <!-- 사이트 설정 탭 -->
+        <div v-if="activeTab === 'siteSetting'">
+          <h2 class="panel-title">사이트 설정 (로고 및 메인 섹션 관리)</h2>
+          
+          <div class="section">
+            <h3>메인 섹션 노출 및 헤더 설정</h3>
+            <p style="font-size:13px; color:#666; margin-bottom:15px;">홈페이지 각 섹션의 노출 여부와 상단 괄호 안의 제목을 설정합니다. (인덱스 번호는 켜진 순서대로 01, 02, 03 자동 부여)</p>
+
+            <!-- Service 설정 -->
+            <div style="border:1px solid #eee; padding:15px; border-radius:8px; margin-bottom:15px; background-color: #fafafa;">
+              <div style="display:flex; align-items:center; gap:10px; margin-bottom:15px; font-weight:bold;">
+                <input type="checkbox" id="svc_visible" v-model="siteSetting.is_service_visible" style="width: 16px; height: 16px;" />
+                <label for="svc_visible" style="margin:0; cursor:pointer; color: #1a3ae0;">Service 섹션 노출하기</label>
+              </div>
+              <div class="form-row">
+                <div class="form-group flex-1">
+                  <label>Service 섹션 메인 타이틀 (예: MONTHLY PLAN)</label>
+                  <input v-model="siteSetting.service_title" type="text" />
+                </div>
+                <div class="form-group flex-1">
+                  <label>Service 서브 설명 (예: 영상 운영 가격 / 한달 기준)</label>
+                  <input v-model="siteSetting.service_desc" type="text" />
+                </div>
+              </div>
+            </div>
+
+            <!-- About 설정 -->
+            <div style="border:1px solid #eee; padding:15px; border-radius:8px; margin-bottom:15px; background-color: #fafafa;">
+              <div style="display:flex; align-items:center; gap:10px; margin-bottom:15px; font-weight:bold;">
+                <input type="checkbox" id="abt_visible" v-model="siteSetting.is_about_visible" style="width: 16px; height: 16px;" />
+                <label for="abt_visible" style="margin:0; cursor:pointer; color: #1a3ae0;">About 섹션 노출하기</label>
+              </div>
+              <div class="form-row">
+                <div class="form-group flex-1">
+                  <label>About 섹션 메인 타이틀 (예: ABOUT THE STUDIO)</label>
+                  <input v-model="siteSetting.about_title" type="text" />
+                </div>
+                <div class="form-group flex-1">
+                  <label>About 서브 설명 (예: 하이어, 더 높은 곳으로)</label>
+                  <input v-model="siteSetting.about_desc" type="text" />
+                </div>
+              </div>
+            </div>
+
+            <!-- Contact / Footer 설정 -->
+            <div style="border:1px solid #eee; padding:15px; border-radius:8px; margin-bottom:25px; background-color: #fafafa;">
+              <div style="display:flex; align-items:center; gap:10px; margin-bottom:15px; font-weight:bold;">
+                <input type="checkbox" id="cnt_visible" v-model="siteSetting.is_contact_visible" style="width: 16px; height: 16px;" />
+                <label for="cnt_visible" style="margin:0; cursor:pointer; color: #e74c3c;">Contact(Footer) 섹션 노출하기 (※ 주의: 끄면 모든 페이지 하단이 통째로 사라집니다)</label>
+              </div>
+              <div class="form-row">
+                <div class="form-group flex-1">
+                  <label>Contact 섹션 메인 타이틀 (예: GET IN TOUCH)</label>
+                  <input v-model="siteSetting.contact_header_title" type="text" />
+                </div>
+                <div class="form-group flex-1">
+                  <label>Contact 서브 설명 (예: 하이어, 더 높은 곳으로)</label>
+                  <input v-model="siteSetting.contact_header_desc" type="text" />
+                </div>
+              </div>
+            </div>
+
+            <hr style="border:none; border-top:1px solid #eee; margin:40px 0;">
+
+            <h3>사이트 로고 텍스트 변경</h3>
+            <p style="font-size:13px; color:#666; margin-bottom:15px;">※ 현재는 데이터베이스(charfield)를 이용한 텍스트 형태의 로고 변경만 지원합니다. 이미지 업로드 기능은 추후 구현됩니다.</p>
+            <div class="form-row" style="margin-bottom:15px;">
+              <div class="form-group flex-1">
+                <label>국문 로고 (logo_kr)</label>
+                <input v-model="siteSetting.logo_kr" type="text" placeholder="예: HIGHER PRODUCTION" />
+              </div>
+            </div>
+            <div class="form-row" style="margin-bottom:25px;">
+              <div class="form-group flex-1">
+                <label>영문 로고 (logo_en)</label>
+                <input v-model="siteSetting.logo_en" type="text" placeholder="예: HIGHER PRODUCTION" />
+              </div>
+            </div>
+
+            <h3 style="margin-top:40px;">About 섹션 제목 변경</h3>
+            <p style="font-size:13px; color:#666; margin-bottom:15px;">홈페이지 'ABOUT THE STUDIO' 섹션의 메인 카피를 수정합니다.</p>
+            
+            <div v-for="(heading, index) in siteSetting.about_headings" :key="index" class="form-row" style="margin-bottom:15px; align-items: center;">
+              <div class="form-group flex-2">
+                <label>{{ index + 1 }}번째 줄</label>
+                <input v-model="heading.text" type="text" placeholder="내용을 입력하세요" />
+              </div>
+              <div class="form-group" style="margin-top: 25px; display: flex; align-items: center; gap: 8px;">
+                <input type="checkbox" :id="'highlight_' + index" v-model="heading.is_highlighted" />
+                <label :for="'highlight_' + index" style="margin:0; cursor:pointer;">강조 적용</label>
+              </div>
+              <div class="form-group" style="margin-top: 25px;">
+                <button class="btn-delete" @click="removeAboutHeading(index)">삭제</button>
+              </div>
+            </div>
+            
+            <div style="margin-bottom: 25px;">
+              <button class="btn-submit" @click="addAboutHeading" style="background-color: #f39c12;">+ 줄 추가하기</button>
+            </div>
+
+            <h3 style="margin-top:40px;">연락처 및 하단 정보 (Footer)</h3>
+            <p style="font-size:13px; color:#666; margin-bottom:15px;">홈페이지 하단(Footer)에 표시되는 연락처 및 슬로건 정보를 수정합니다.</p>
+            
+            <label style="display:block; font-size:13px; font-weight:600; color:#555; margin-bottom:5px;">푸터 메인 슬로건 (footer_slogan_main)</label>
+            <div v-for="(line, index) in siteSetting.footer_slogan_main" :key="'fs_' + index" class="form-row" style="margin-bottom:10px; align-items:center;">
+              <div class="form-group flex-1">
+                <input v-model="siteSetting.footer_slogan_main[index]" type="text" placeholder="문장을 입력하세요" />
+              </div>
+              <div class="form-group" style="margin-bottom:0;">
+                <button class="btn-delete" @click="siteSetting.footer_slogan_main.splice(index, 1)">삭제</button>
+              </div>
+            </div>
+            <div style="margin-bottom: 25px;">
+              <button class="btn-submit" @click="siteSetting.footer_slogan_main.push('')" style="background-color: #f39c12; padding:8px 15px; width:auto; font-size:13px;">+ 줄 추가하기</button>
+            </div>
+
+            <div class="form-row" style="margin-bottom:15px;">
+              <div class="form-group flex-1">
+                <label>푸터 서브 슬로건 (footer_slogan_sub)</label>
+                <input v-model="siteSetting.footer_slogan_sub" type="text" placeholder="예: Let's go higher." />
+              </div>
+            </div>
+
+            <div class="form-row" style="margin-bottom:15px;">
+              <div class="form-group flex-1">
+                <label>이메일 (Email)</label>
+                <input v-model="siteSetting.email" type="email" placeholder="예: higher3pd@gmail.com" />
+              </div>
+              <div class="form-group flex-1">
+                <label>전화번호 (Phone)</label>
+                <input v-model="siteSetting.phone" type="text" placeholder="예: +82 10-3313-0388" />
+              </div>
+            </div>
+            
+            <div class="form-row" style="margin-bottom:15px;">
+              <div class="form-group flex-1">
+                <label>스튜디오 주소 (Address)</label>
+                <input v-model="siteSetting.address" type="text" placeholder="예: 경기도 의정부시, KR" />
+              </div>
+            </div>
+            
+            <div class="form-row" style="margin-bottom:25px;">
+              <div class="form-group flex-1">
+                <label>인스타그램 아이디 (Handle)</label>
+                <input v-model="siteSetting.instagram_handle" type="text" placeholder="예: @higher.production" />
+              </div>
+              <div class="form-group flex-2">
+                <label>인스타그램 링크 (URL)</label>
+                <input v-model="siteSetting.instagram_url" type="url" placeholder="예: https://instagram.com/higher.production" />
+              </div>
+            </div>
+
+            <h3 style="margin-top:40px;">문의 페이지 (Contact) 설정</h3>
+            <p style="font-size:13px; color:#666; margin-bottom:15px;">Contact 페이지 상단의 메인 타이틀을 수정합니다.</p>
+            
+            <div class="form-row" style="margin-bottom:25px;">
+              <div class="form-group flex-1">
+                <label>페이지 타이틀 (contact_title)</label>
+                <input v-model="siteSetting.contact_title" type="text" placeholder="예: LET'S GO HIGHER" />
+              </div>
+            </div>
+
+            <button class="btn-submit" @click="saveSiteSetting">설정 저장</button>
+          </div>
+        </div>
+
       </main>
     </div>
 
@@ -956,7 +1209,7 @@ const updateInquiryStatus = async (inq) => {
   margin-bottom: 5px;
 }
 
-input[type="text"], select, textarea {
+input[type="text"], input[type="email"], input[type="url"], select, textarea {
   width: 100%;
   padding: 12px 15px;
   border: 1px solid #ddd;

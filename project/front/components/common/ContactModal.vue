@@ -4,7 +4,7 @@
       <button class="close-btn" @click="close">&times;</button>
       
       <div class="modal-header">
-        <span class="brand-label">HIGHER PRODUCTION</span>
+        <span class="brand-label">{{ siteSetting.logo_en }}</span>
         <h2 class="modal-title">견적·문의하기</h2>
         <p class="modal-subtitle">아래 내용을 작성해주시면 빠르게 검토 후 연락드리겠습니다.</p>
       </div>
@@ -24,7 +24,7 @@
           </div>
           <div class="form-group">
             <label>회사명</label>
-            <input type="text" v-model="form.company" placeholder="하이어 프로덕션" />
+            <input type="text" v-model="form.company" :placeholder="siteSetting.logo_kr" />
           </div>
         </div>
 
@@ -93,14 +93,41 @@
       </form>
 
       <div class="modal-footer">
-        higher3pd@gmail.com - +82 10-3313-0388
+        {{ siteSetting.email }} - {{ siteSetting.phone }}
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, reactive } from 'vue'
+import { ref, reactive, onMounted } from 'vue'
+
+const siteSetting = ref({
+  logo_kr: '하이어 프로덕션',
+  logo_en: 'HIGHER PRODUCTION',
+  email: 'higher3pd@gmail.com',
+  phone: '+82 10-3313-0388'
+})
+
+const loadSiteSetting = async () => {
+  try {
+    const data = await $fetch('http://127.0.0.1:8000/system/settings/')
+    if (data) {
+      siteSetting.value = {
+        logo_kr: data.logo_kr || '하이어 프로덕션',
+        logo_en: data.logo_en || 'HIGHER PRODUCTION',
+        email: data.email || 'higher3pd@gmail.com',
+        phone: data.phone || '+82 10-3313-0388'
+      }
+    }
+  } catch (e) {
+    console.error('Failed to load site setting:', e)
+  }
+}
+
+onMounted(() => {
+  loadSiteSetting()
+})
 
 const props = defineProps({
   modelValue: {

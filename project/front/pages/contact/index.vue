@@ -4,8 +4,8 @@
       
       <!-- 헤더 섹션 -->
       <header class="contact-header">
-        <h1 class="page-title">LET'S GO HIGHER</h1>
-        <p class="page-subtitle">하이어 프로덕션과 함께 당신의 브랜드를 한 단계 더 위로 끌어올려 보세요.</p>
+        <h1 class="page-title">{{ siteSetting.contact_title }}</h1>
+        <p class="page-subtitle">{{ siteSetting.logo_kr }}과 함께 당신의 브랜드를 한 단계 더 위로 끌어올려 보세요.</p>
       </header>
 
       <div class="contact-content">
@@ -13,22 +13,22 @@
         <div class="contact-info">
           <div class="info-block">
             <span class="info-label">EMAIL</span>
-            <a href="mailto:higher3pd@gmail.com" class="info-value">higher3pd@gmail.com</a>
+            <a :href="'mailto:' + siteSetting.email" class="info-value">{{ siteSetting.email }}</a>
           </div>
           
           <div class="info-block">
             <span class="info-label">PHONE</span>
-            <a href="tel:+821033130388" class="info-value">+82 10-3313-0388</a>
+            <a :href="'tel:' + siteSetting.phone.replace(/[^0-9+]/g, '')" class="info-value">{{ siteSetting.phone }}</a>
           </div>
           
           <div class="info-block">
             <span class="info-label">STUDIO</span>
-            <span class="info-value">경기도 의정부시, KR</span>
+            <span class="info-value">{{ siteSetting.address }}</span>
           </div>
           
           <div class="info-block">
             <span class="info-label">INSTAGRAM</span>
-            <a href="https://instagram.com/higher.production" target="_blank" rel="noopener noreferrer" class="info-value">@higher.production</a>
+            <a :href="siteSetting.instagram_url" target="_blank" rel="noopener noreferrer" class="info-value">{{ siteSetting.instagram_handle }}</a>
           </div>
           
           <div class="business-info">
@@ -126,7 +126,40 @@
 </template>
 
 <script setup>
-import { ref, reactive } from 'vue'
+import { ref, reactive, onMounted } from 'vue'
+
+const siteSetting = ref({
+  logo_kr: '하이어 프로덕션',
+  contact_title: "LET'S GO HIGHER",
+  email: 'higher3pd@gmail.com',
+  phone: '+82 10-3313-0388',
+  address: '경기도 의정부시, KR',
+  instagram_handle: '@higher.production',
+  instagram_url: 'https://instagram.com/higher.production'
+})
+
+const loadSiteSetting = async () => {
+  try {
+    const data = await $fetch('http://127.0.0.1:8000/system/settings/')
+    if (data) {
+      siteSetting.value = {
+        logo_kr: data.logo_kr || '하이어 프로덕션',
+        contact_title: data.contact_title || "LET'S GO HIGHER",
+        email: data.email || 'higher3pd@gmail.com',
+        phone: data.phone || '+82 10-3313-0388',
+        address: data.address || '경기도 의정부시, KR',
+        instagram_handle: data.instagram_handle || '@higher.production',
+        instagram_url: data.instagram_url || 'https://instagram.com/higher.production'
+      }
+    }
+  } catch (e) {
+    console.error('Failed to load site setting:', e)
+  }
+}
+
+onMounted(() => {
+  loadSiteSetting()
+})
 
 const form = reactive({
   title: '',

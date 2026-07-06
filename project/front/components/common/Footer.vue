@@ -1,25 +1,29 @@
 <template>
-  <footer class="global-footer">
+  <footer v-if="siteSetting.is_contact_visible" class="global-footer">
     <div class="footer-container">
       
       <!-- 푸터 헤더 (About 섹션과 동일한 스타일) -->
       <div class="footer-header">
         <div class="header-left">
-          <span class="header-bracket">[ 03 / contact ]</span>
-          <h2 class="header-title">GET IN TOUCH</h2>
+          <span class="header-bracket">[ {{ contactIndexStr }} / contact ]</span>
+          <h2 class="header-title">{{ siteSetting.contact_header_title }}</h2>
         </div>
         <div class="header-right">
-          <span class="header-desc">하이어, 더 높은 곳으로</span>
+          <span class="header-desc">{{ siteSetting.contact_header_desc }}</span>
         </div>
       </div>
 
       <!-- 상단 메인 텍스트 영역 -->
       <div class="footer-top">
         <div class="footer-top-text">
-          <h2 class="main-heading">당신의 브랜드,<br>한 단계 더 위로</h2>
+          <h2 class="main-heading">
+            <template v-for="(line, idx) in siteSetting.footer_slogan_main" :key="idx">
+              <span style="white-space: nowrap; word-break: keep-all;">{{ line }}</span><br />
+            </template>
+          </h2>
           <div class="sub-heading-wrap">
             <span class="arrow-icon">→</span>
-            <h3 class="sub-heading">Let's go higher.</h3>
+            <h3 class="sub-heading">{{ siteSetting.footer_slogan_sub }}</h3>
           </div>
         </div>
         
@@ -34,26 +38,26 @@
       <div class="footer-info">
         <div class="info-col">
           <span class="info-label">EMAIL</span>
-          <a href="mailto:higher3pd@gmail.com" class="info-value">higher3pd@gmail.com</a>
+          <a :href="'mailto:' + siteSetting.email" class="info-value">{{ siteSetting.email }}</a>
         </div>
         <div class="info-col">
           <span class="info-label">PHONE</span>
-          <a href="tel:+821033130388" class="info-value">+82 10-3313-0388</a>
+          <a :href="'tel:' + siteSetting.phone.replace(/[^0-9+]/g, '')" class="info-value">{{ siteSetting.phone }}</a>
         </div>
         <div class="info-col">
           <span class="info-label">STUDIO</span>
-          <span class="info-value">경기도 의정부시, KR</span>
+          <span class="info-value">{{ siteSetting.address }}</span>
         </div>
         <div class="info-col">
           <span class="info-label">INSTAGRAM</span>
-          <a href="https://instagram.com/higher.production" target="_blank" rel="noopener noreferrer" class="info-value">@higher.production</a>
+          <a :href="siteSetting.instagram_url" target="_blank" rel="noopener noreferrer" class="info-value">{{ siteSetting.instagram_handle }}</a>
         </div>
       </div>
 
       <!-- 하단 카피라이트 영역 -->
       <div class="footer-bottom">
         <div class="copyright">
-          © 2026 HIGHER PRODUCTION — ALL FRAMES RESERVED
+          © 2026 {{ siteSetting.logo_en }} — ALL FRAMES RESERVED
         </div>
         <div class="designer-mark" @click="scrollToTop">
           DESIGNED IN KOREA — GO HIGHER ↑
@@ -68,10 +72,25 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, computed, onMounted } from 'vue'
+import { useSiteStore } from '~/stores/site'
 import ContactModal from '~/components/common/ContactModal.vue'
 
+const siteStore = useSiteStore()
 const showContactModal = ref(false)
+
+const siteSetting = computed(() => siteStore.settings)
+
+const contactIndexStr = computed(() => {
+  let count = 1
+  if (siteStore.settings.is_service_visible) count++
+  if (siteStore.settings.is_about_visible) count++
+  return count.toString().padStart(2, '0')
+})
+
+onMounted(() => {
+  siteStore.fetchSettings()
+})
 
 const scrollToTop = () => {
   window.scrollTo({
@@ -103,29 +122,31 @@ const scrollToTop = () => {
   border-bottom: 1px solid rgba(255, 255, 255, 0.2);
   padding-bottom: 20px;
   margin-bottom: 80px;
+  white-space: nowrap;
+  word-break: keep-all;
 }
 
 .header-left {
   display: flex;
   align-items: center;
-  gap: 15px;
+  gap: clamp(8px, 2vw, 15px);
 }
 
 .header-bracket {
-  font-size: 14px;
+  font-size: clamp(10px, 1.5vw + 6px, 14px);
   font-weight: 500;
   letter-spacing: 1px;
 }
 
 .header-title {
-  font-size: 24px;
+  font-size: clamp(14px, 2.5vw + 8px, 24px);
   font-weight: 800;
   margin: 0;
   letter-spacing: 0.5px;
 }
 
 .header-right .header-desc {
-  font-size: 14px;
+  font-size: clamp(10px, 1.5vw + 6px, 14px);
   opacity: 0.8;
   letter-spacing: 1px;
 }
@@ -159,14 +180,14 @@ const scrollToTop = () => {
 
 .arrow-icon {
   font-size: clamp(40px, 5vw, 60px);
-  color: #1a3ae0;
+  color: var(--primary-deep-color);
   font-weight: 400;
 }
 
 .sub-heading {
   font-size: clamp(48px, 6vw, 72px);
   font-weight: 700;
-  color: #1a3ae0;
+  color: var(--primary-deep-color);
   margin: 0;
   letter-spacing: -1px;
 }
@@ -180,7 +201,7 @@ const scrollToTop = () => {
   display: inline-flex;
   align-items: center;
   gap: 10px;
-  background-color: #1a3ae0;
+  background-color: var(--primary-color);
   color: #ffffff;
   padding: 16px 36px;
   border-radius: 4px;
@@ -191,7 +212,7 @@ const scrollToTop = () => {
 }
 
 .btn-contact:hover {
-  background-color: #152bb5;
+  background-color: var(--primary-deep-color);
   transform: translateY(-2px);
 }
 

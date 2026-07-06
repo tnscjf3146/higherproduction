@@ -95,7 +95,7 @@ const padZero = (num) => num < 10 ? `0${num}` : num
 .stat-number {
   font-size: 80px;
   font-weight: 800;
-  color: #1a3ae0; /* 메인 블루 컬러 */
+  color: var(--primary-color); /* 메인 블루 컬러 */
   margin: 0 0 20px 0;
   line-height: 1;
   letter-spacing: -2px;

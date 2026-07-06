@@ -3,22 +3,38 @@
     <div class="ticker-track">
       <!-- 끊임없이 자연스럽게 이어지게 하기 위해 내용을 두 번 반복합니다 -->
       <div class="ticker-content">
-        <span>FILM ✕ MOTION ✕ BRAND — HIGHER PRODUCTION</span>
-        <span>FILM ✕ MOTION ✕ BRAND — HIGHER PRODUCTION</span>
-        <span>FILM ✕ MOTION ✕ BRAND — HIGHER PRODUCTION</span>
+        <span>FILM ✕ MOTION ✕ BRAND — {{ logoEn }}</span>
+        <span>FILM ✕ MOTION ✕ BRAND — {{ logoEn }}</span>
+        <span>FILM ✕ MOTION ✕ BRAND — {{ logoEn }}</span>
       </div>
       <div class="ticker-content">
-        <span>FILM ✕ MOTION ✕ BRAND — HIGHER PRODUCTION</span>
-        <span>FILM ✕ MOTION ✕ BRAND — HIGHER PRODUCTION</span>
-        <span>FILM ✕ MOTION ✕ BRAND — HIGHER PRODUCTION</span>
+        <span>FILM ✕ MOTION ✕ BRAND — {{ logoEn }}</span>
+        <span>FILM ✕ MOTION ✕ BRAND — {{ logoEn }}</span>
+        <span>FILM ✕ MOTION ✕ BRAND — {{ logoEn }}</span>
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
-// 나중에 프롭스(Props)로 외부에서 텍스트를 받아오게 만들 수도 있습니다.
-// 현재는 기본 세팅만 둡니다.
+import { ref, onMounted } from 'vue'
+
+const logoEn = ref('HIGHER PRODUCTION')
+
+const loadSiteSetting = async () => {
+  try {
+    const data = await $fetch('http://127.0.0.1:8000/system/settings/')
+    if (data && data.logo_en) {
+      logoEn.value = data.logo_en
+    }
+  } catch (e) {
+    console.error('Failed to load site setting:', e)
+  }
+}
+
+onMounted(() => {
+  loadSiteSetting()
+})
 </script>
 
 <style scoped>

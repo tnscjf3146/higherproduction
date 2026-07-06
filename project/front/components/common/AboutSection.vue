@@ -3,19 +3,20 @@
     <div class="about-container">
       <div class="about-header">
         <div class="header-left">
-          <span class="header-bracket">[ 02 / about ]</span>
-          <h2 class="header-title">ABOUT THE STUDIO</h2>
+          <span class="header-bracket">[ {{ sectionIndex }} / about ]</span>
+          <h2 class="header-title">{{ title }}</h2>
         </div>
         <div class="header-right">
-          <span class="header-desc">하이어, 더 높은 곳으로</span>
+          <span class="header-desc">{{ desc }}</span>
         </div>
       </div>
 
       <div class="about-content">
         <div class="content-left">
           <h3 class="main-heading">
-            브랜드의 고도를 높이는<br />
-            우상향 프로덕션<br />
+            <template v-for="(line, idx) in aboutHeadings" :key="idx">
+              <span :class="{ 'highlight-text': line.is_highlighted }" style="white-space: nowrap; word-break: keep-all;">{{ line.text }}</span><br />
+            </template>
             <span class="logo-text">
               <img src="/nav_logo_en.png" alt="HIGHER PRODUCTION" class="logo-img" />
             </span>
@@ -66,14 +67,40 @@
 </template>
 
 <script setup>
-// About 컴포넌트 로직
+import { ref, onMounted } from 'vue'
+
+const props = defineProps({
+  sectionIndex: { type: String, default: '02' },
+  title: { type: String, default: 'ABOUT THE STUDIO' },
+  desc: { type: String, default: '하이어, 더 높은 곳으로' }
+})
+
+const aboutHeadings = ref([
+  { text: '브랜드의 고도를 높이는', is_highlighted: false },
+  { text: '우상향 프로덕션', is_highlighted: false }
+])
+
+const loadSiteSetting = async () => {
+  try {
+    const data = await $fetch('http://127.0.0.1:8000/system/settings/')
+    if (data && data.about_headings && data.about_headings.length > 0) {
+      aboutHeadings.value = data.about_headings
+    }
+  } catch (e) {
+    console.error('Failed to load site setting:', e)
+  }
+}
+
+onMounted(() => {
+  loadSiteSetting()
+})
 </script>
 
 <style scoped>
 .about-section {
   position: relative;
   z-index: 10;
-  background-color: #1a3ae0; /* 메인 블루 컬러 */
+  background-color: var(--primary-color); /* 메인 블루 컬러 */
   color: #ffffff;
   padding: 80px 40px 120px;
   font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, 'Helvetica Neue', 'Segoe UI', 'Apple SD Gothic Neo', 'Noto Sans KR', 'Malgun Gothic', sans-serif;
@@ -92,29 +119,31 @@
   border-bottom: 1px solid rgba(255, 255, 255, 0.2);
   padding-bottom: 20px;
   margin-bottom: 60px;
+  white-space: nowrap;
+  word-break: keep-all;
 }
 
 .header-left {
   display: flex;
   align-items: center;
-  gap: 15px;
+  gap: clamp(8px, 2vw, 15px);
 }
 
 .header-bracket {
-  font-size: 14px;
+  font-size: clamp(10px, 1.5vw + 6px, 14px);
   font-weight: 500;
   letter-spacing: 1px;
 }
 
 .header-title {
-  font-size: 24px;
+  font-size: clamp(14px, 2.5vw + 8px, 24px);
   font-weight: 800;
   margin: 0;
   letter-spacing: 0.5px;
 }
 
 .header-desc {
-  font-size: 14px;
+  font-size: clamp(10px, 1.5vw + 6px, 14px);
   opacity: 0.8;
   letter-spacing: 1px;
 }
@@ -138,6 +167,11 @@
   line-height: 1.3;
   margin: 0;
   letter-spacing: -1px;
+}
+
+.highlight-text {
+  color: var(--primary-deep-color); /* 강조 텍스트 색상 (노란색) */
+  font-weight: 800;
 }
 
 .logo-text {
@@ -243,12 +277,6 @@
 @media (max-width: 768px) {
   .about-section {
     padding: 60px 20px 80px;
-  }
-  
-  .about-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 15px;
   }
   
   .main-heading {

@@ -16,9 +16,9 @@
 /* 2. 전역 변수 (Design Tokens) 설정 */
 :root {
   /* 주요 테마 색상 */
-  --primary-color: #1A3DEE;
-  --primary-deep-color: #0E22A8;
-  --primary-soft-color: #E5EAFF;
+  --primary-color: #474747;
+  --primary-deep-color: #faea5f;
+  --primary-soft-color: #ffffff;
 
   /* 페이지 색상 */
   --primary-paper-color: #FAFAF7;

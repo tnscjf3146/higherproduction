@@ -5,11 +5,11 @@
       <!-- 상단 헤더 영역 -->
       <div class="service-header-top">
         <div class="header-left">
-          <span class="header-bracket">[ 01 / services ]</span>
-          <h2 class="header-title">MONTHLY PLAN</h2>
+          <span class="header-bracket">[ {{ sectionIndex }} / services ]</span>
+          <h2 class="header-title">{{ title }}</h2>
         </div>
         <div class="header-right">
-          <span class="header-desc">영상 운영 가격 / 한달 기준</span>
+          <span class="header-desc">{{ desc }}</span>
         </div>
       </div>
 
@@ -100,6 +100,12 @@
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue'
 
+const props = defineProps({
+  sectionIndex: { type: String, default: '01' },
+  title: { type: String, default: 'MONTHLY PLAN' },
+  desc: { type: String, default: '영상 운영 가격 / 한달 기준' }
+})
+
 const plans = ref([])
 const sliderRef = ref(null)
 const currentIdx = ref(0)
@@ -166,23 +172,25 @@ onUnmounted(() => {
   border-bottom: 1px solid #ddd;
   padding-bottom: 15px;
   margin-bottom: 50px; /* 여백 축소 */
+  white-space: nowrap;
+  word-break: keep-all;
 }
 
 .header-left {
   display: flex;
   align-items: center;
-  gap: 15px;
+  gap: clamp(8px, 2vw, 15px);
 }
 
 .header-bracket {
-  font-size: 14px;
+  font-size: clamp(10px, 1.5vw + 6px, 14px);
   font-weight: 600;
-  color: #1a3ae0;
+  color: var(--primary-color);
   letter-spacing: 1px;
 }
 
 .header-title {
-  font-size: 24px;
+  font-size: clamp(14px, 2.5vw + 8px, 24px);
   font-weight: 800;
   color: #111;
   margin: 0;
@@ -190,7 +198,7 @@ onUnmounted(() => {
 }
 
 .header-right .header-desc {
-  font-size: 14px;
+  font-size: clamp(10px, 1.5vw + 6px, 14px);
   color: #666;
 }
 
@@ -209,7 +217,7 @@ onUnmounted(() => {
 }
 
 .highlight-blue {
-  color: #1a3ae0;
+  color: var(--primary-deep-color);
 }
 
 .sub-heading {
@@ -270,7 +278,7 @@ onUnmounted(() => {
 }
 
 .slider-dots .dot.active {
-  background-color: #1a3ae0;
+  background-color: var(--primary-color);
 }
 
 /* 라이트 테마 (기존 베이직 플랜) */
@@ -281,7 +289,7 @@ onUnmounted(() => {
 
 /* 다크 테마 (기존 그로스 플랜) */
 .plan-theme-dark {
-  background-color: #1a3ae0;
+  background-color: var(--primary-color);
   color: #fff;
 }
 
@@ -305,8 +313,8 @@ onUnmounted(() => {
 }
 
 .plan-theme-light .badge-icon {
-  border: 1px solid #1a3ae0;
-  color: #1a3ae0;
+  border: 1px solid var(--primary-color);
+  color: var(--primary-color);
 }
 .plan-theme-dark .badge-icon {
   border: 1px solid #fff;
@@ -319,7 +327,7 @@ onUnmounted(() => {
   letter-spacing: 1px;
 }
 
-.plan-theme-light .badge-text { color: #1a3ae0; }
+.plan-theme-light .badge-text { color: var(--primary-color); }
 .plan-theme-dark .badge-text { color: #fff; }
 
 /* 플랜 제목 */
@@ -435,7 +443,7 @@ onUnmounted(() => {
 }
 
 .plan-theme-light .list-value li::before {
-  color: #1a3ae0;
+  color: var(--primary-color);
 }
 .plan-theme-dark .list-value li::before {
   color: #fff;
@@ -461,12 +469,12 @@ onUnmounted(() => {
   color: #fff;
 }
 .btn-theme-light:hover {
-  background-color: #1a3ae0;
+  background-color: var(--primary-color);
 }
 
 .btn-theme-dark {
   background-color: #fff;
-  color: #1a3ae0;
+  color: var(--primary-color);
 }
 .btn-theme-dark:hover {
   background-color: #f0f0f0;

@@ -69,22 +69,44 @@
       <CommonTicker></CommonTicker>
       
       <!-- 새로 추가된 Service 섹션 -->
-      <CommonServiceSection />
+      <CommonServiceSection 
+        v-if="siteStore.settings.is_service_visible"
+        :section-index="serviceIndexStr"
+        :title="siteStore.settings.service_title"
+        :desc="siteStore.settings.service_desc"
+      />
 
       <!-- 새로 추가된 Stats 섹션 -->
       <CommonStatsSection />
 
       <!-- 새로 추가된 About 섹션 -->
-      <CommonAboutSection />
+      <CommonAboutSection 
+        v-if="siteStore.settings.is_about_visible"
+        :section-index="aboutIndexStr"
+        :title="siteStore.settings.about_title"
+        :desc="siteStore.settings.about_desc"
+      />
     </div>
     
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { useSiteStore } from '~/stores/site'
+
+const siteStore = useSiteStore()
 
 const currentStage = ref(0)
+
+const serviceIndexStr = computed(() => {
+  return siteStore.settings.is_service_visible ? '01' : ''
+})
+
+const aboutIndexStr = computed(() => {
+  if (!siteStore.settings.is_about_visible) return ''
+  return siteStore.settings.is_service_visible ? '02' : '01'
+})
 
 /* 실시간 시계 로직 */
 const currentTime = ref('')
@@ -102,6 +124,8 @@ const updateTime = () => {
 }
 
 onMounted(() => {
+  siteStore.fetchSettings()
+  
   // 컴포넌트가 로드되면 시계 작동 시작 (1초마다 업데이트)
   updateTime()
   timer = setInterval(updateTime, 1000)
