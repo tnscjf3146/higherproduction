@@ -57,7 +57,7 @@
               </div>
               <div class="form-group">
                 <label>회사명</label>
-                <input type="text" v-model="form.company" placeholder="하이어 프로덕션" />
+                <input type="text" v-model="form.company" :placeholder="siteSetting.logo_kr" />
               </div>
             </div>
 

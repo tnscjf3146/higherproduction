@@ -99,16 +99,16 @@ def request_password_reset(request):
         # 프론트엔드 비밀번호 재설정 페이지 URL 조합
         reset_url = f"http://localhost:3000/account/reset-password?uid={uid}&token={token}"
         
-        # settings.py의 EMAIL_BACKEND 설정에 따라 콘솔 창에 출력됨
+        # settings.py의 EMAIL_BACKEND 설정에 따라 실제 이메일로 발송됨
         send_mail(
             subject='[하이어 프로덕션] 비밀번호 재설정 링크 안내',
             message=f'안녕하세요 {username}님,\n\n아래 링크를 클릭하여 비밀번호를 재설정해 주세요:\n\n{reset_url}\n\n본인이 요청하지 않았다면 이 이메일을 무시해 주세요.',
-            from_email='noreply@higherproduction.com',
+            from_email=None, # settings.py의 DEFAULT_FROM_EMAIL이 자동 사용됨
             recipient_list=[user.email],
             fail_silently=False,
         )
         
-        return Response({"message": "비밀번호 재설정 링크를 이메일로 발송했습니다.\n(현재 개발 환경이므로 백엔드 터미널 창을 확인하세요!)"}, status=status.HTTP_200_OK)
+        return Response({"message": "비밀번호 재설정 링크를 이메일로 발송했습니다. 이메일함을 확인해주세요."}, status=status.HTTP_200_OK)
         
     except User.DoesNotExist:
         return Response({"error": "입력하신 정보와 일치하는 계정이 없습니다."}, status=status.HTTP_404_NOT_FOUND)

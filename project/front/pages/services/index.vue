@@ -9,7 +9,7 @@
         </h1>
         <p class="hero-subtitle">
           단순한 영상 제작을 넘어, 브랜드의 성장을 위한 전략적 파트너가 됩니다.<br>
-          하이어 프로덕션의 체계적인 월간 운영 플랜을 만나보세요.
+          {{ siteSetting.logo_kr }}의 체계적인 월간 운영 플랜을 만나보세요.
         </p>
       </div>
       <div class="hero-bg-glow"></div>
@@ -152,7 +152,23 @@ import { ref, onMounted } from 'vue'
 const plans = ref([])
 const pending = ref(true)
 
+const siteSetting = ref({
+  logo_kr: '하이어 프로덕션'
+})
+
+const loadSiteSetting = async () => {
+  try {
+    const data = await $fetch('http://127.0.0.1:8000/system/settings/')
+    if (data && data.logo_kr) {
+      siteSetting.value.logo_kr = data.logo_kr
+    }
+  } catch (e) {
+    console.error('Failed to load site setting:', e)
+  }
+}
+
 onMounted(async () => {
+  loadSiteSetting()
   try {
     const data = await $fetch('http://127.0.0.1:8000/product/plans/')
     plans.value = data
