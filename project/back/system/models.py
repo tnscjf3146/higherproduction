@@ -7,14 +7,14 @@ def default_about_headings():
     return ["MISSION", "VISION", "CORE VALUES"]
 
 class SiteSetting(models.Model):
-    logo_kr = models.CharField(max_length=255, blank=True, null=True, verbose_name="국문 로고 텍스트/경로", default="하이어 프로덕션")
-    logo_en = models.CharField(max_length=255, blank=True, null=True, verbose_name="영문 로고 텍스트/경로", default="HIGHER PRODUCTION")
+    logo_kr = models.CharField(max_length=255, blank=True, null=True, verbose_name="국문 로고 텍스트/경로", default="국문 로고")
+    logo_en = models.CharField(max_length=255, blank=True, null=True, verbose_name="영문 로고 텍스트/경로", default="EN_LOGO")
     about_headings = models.JSONField(blank=True, null=True, verbose_name="About 섹션 제목 리스트", default=default_about_headings)
-    email = models.EmailField(blank=True, null=True, verbose_name="스튜디오 이메일", default="higher3pd@gmail.com")
-    phone = models.CharField(max_length=50, blank=True, null=True, verbose_name="스튜디오 전화번호", default="+82 10-3313-0388")
-    address = models.CharField(max_length=255, blank=True, null=True, verbose_name="스튜디오 주소", default="경기도 의정부시, KR")
-    instagram_handle = models.CharField(max_length=100, blank=True, null=True, verbose_name="인스타그램 핸들", default="@higher.production")
-    instagram_url = models.URLField(max_length=255, blank=True, null=True, verbose_name="인스타그램 주소", default="https://instagram.com/higher.production")
+    email = models.EmailField(blank=True, null=True, verbose_name="스튜디오 이메일", default="email@gmail.com")
+    phone = models.CharField(max_length=50, blank=True, null=True, verbose_name="스튜디오 전화번호", default="+82 10-0000-0000")
+    address = models.CharField(max_length=255, blank=True, null=True, verbose_name="스튜디오 주소", default="우리집")
+    instagram_handle = models.CharField(max_length=100, blank=True, null=True, verbose_name="인스타그램 핸들", default="인스타핸들")
+    instagram_url = models.URLField(max_length=255, blank=True, null=True, verbose_name="인스타그램 주소", default="https://인스타_주소")
     
     # --- Service Section Config ---
     is_service_visible = models.BooleanField(default=True, verbose_name="Service 노출 여부")
