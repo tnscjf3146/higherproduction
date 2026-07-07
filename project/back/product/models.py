@@ -1,5 +1,9 @@
 from django.db import models
 
+class PlanType(models.Model):
+    name = models.CharField(max_length=255, verbose_name="플랜 종류 이름")
+    def __str__(self): return self.name
+
 class Recommend(models.Model):
     name = models.CharField(max_length=255, verbose_name="항목 이름")
     def __str__(self): return self.name
@@ -17,11 +21,7 @@ class Item(models.Model):
     def __str__(self): return self.name
 
 class Plan(models.Model):
-    PLAN_TYPE_CHOICES = (
-        ('BASIC', 'BASIC'),
-        ('GROWTH', 'GROWTH'),
-    )
-    plan_type = models.CharField(max_length=20, choices=PLAN_TYPE_CHOICES, unique=True, verbose_name="플랜 종류")
+    plan_type = models.ForeignKey(PlanType, on_delete=models.SET_NULL, null=True, verbose_name="플랜 종류")
     name = models.CharField(max_length=255, verbose_name="플랜명 (ex: Basic Channel Operation)")
     subname = models.CharField(max_length=255, verbose_name="서브명 (ex: 베이직 채널 운영)", blank=True, null=True)
     price = models.IntegerField(verbose_name="가격(만원)")
@@ -35,4 +35,5 @@ class Plan(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return f"[{self.plan_type}] {self.name}"
+        type_name = self.plan_type.name if self.plan_type else '미지정'
+        return f"[{type_name}] {self.name}"

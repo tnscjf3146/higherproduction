@@ -86,7 +86,7 @@
             <div class="plan-footer">
               <NuxtLink to="/contact">
                 <button class="cta-button" :class="index % 2 === 0 ? 'btn-dark' : 'btn-light'">
-                  {{ plan.plan_type }} 문의하기
+                  문의하기
                   <span class="arrow">→</span>
                 </button>
               </NuxtLink>

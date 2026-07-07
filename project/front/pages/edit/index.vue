@@ -69,6 +69,80 @@ const isSearching = ref(false)
 // 비디오 플레이어 상태
 const playingVideoId = ref('')
 
+// 플랜(요금제) 관련 상태
+const plans = ref([])
+const planTypes = ref([])
+const recommends = ref([])
+const operations = ref([])
+const productions = ref([])
+const items = ref([])
+
+const formRecommend = ref({ name: '' })
+const formPlanType = ref({ name: '' })
+const formOperation = ref({ name: '' })
+const formProduction = ref({ name: '' })
+const formItem = ref({ name: '' })
+const formPlan = ref({ 
+  plan_type: null, name: '', subname: '', price: 0, 
+  recommend_ids: [], operation_ids: [], production_ids: [], item_ids: [] 
+})
+
+// 플랜 관련 데이터 불러오기
+const loadPlans = async () => {
+  try { plans.value = await $fetch('http://127.0.0.1:8000/product/plans/') } catch (e) { console.error(e) }
+}
+const loadPlanTypes = async () => {
+  try { planTypes.value = await $fetch('http://127.0.0.1:8000/product/plan_types/') } catch (e) { console.error(e) }
+}
+const loadRecommends = async () => {
+  try { recommends.value = await $fetch('http://127.0.0.1:8000/product/recommends/') } catch (e) { console.error(e) }
+}
+const loadOperations = async () => {
+  try { operations.value = await $fetch('http://127.0.0.1:8000/product/operations/') } catch (e) { console.error(e) }
+}
+const loadProductions = async () => {
+  try { productions.value = await $fetch('http://127.0.0.1:8000/product/productions/') } catch (e) { console.error(e) }
+}
+const loadItems = async () => {
+  try { items.value = await $fetch('http://127.0.0.1:8000/product/items/') } catch (e) { console.error(e) }
+}
+
+const addSimpleItem = async (endpoint, formData, reloadFunc) => {
+  if (!formData.name) return alert('항목 이름을 입력해주세요.')
+  try {
+    await $fetch(`http://127.0.0.1:8000/product/${endpoint}/`, { method: 'POST', body: { name: formData.name } })
+    formData.name = ''
+    reloadFunc()
+  } catch (e) { console.error(e); alert('추가 실패') }
+}
+const deleteSimpleItem = async (endpoint, id, reloadFunc) => {
+  if (!confirm('정말 삭제하시겠습니까?')) return
+  try {
+    await $fetch(`http://127.0.0.1:8000/product/${endpoint}/${id}/`, { method: 'DELETE' })
+    reloadFunc()
+  } catch (e) { console.error(e); alert('삭제 실패') }
+}
+
+const addPlan = async () => {
+  if (!formPlan.value.name || formPlan.value.price === null) return alert('플랜명과 가격을 입력해주세요.')
+  try {
+    await $fetch('http://127.0.0.1:8000/product/plans/', {
+      method: 'POST',
+      body: formPlan.value
+    })
+    formPlan.value = { plan_type: null, name: '', subname: '', price: 0, recommend_ids: [], operation_ids: [], production_ids: [], item_ids: [] }
+    alert('요금제가 추가되었습니다.')
+    loadPlans()
+  } catch (e) { console.error(e); alert('추가 실패') }
+}
+const deletePlan = async (id) => {
+  if (!confirm('정말 삭제하시겠습니까?')) return
+  try {
+    await $fetch(`http://127.0.0.1:8000/product/plans/${id}/`, { method: 'DELETE' })
+    loadPlans()
+  } catch (e) { console.error(e); alert('삭제 실패') }
+}
+
 // 데이터 불러오기 함수
 const loadBrandClients = async () => {
   try {
@@ -149,6 +223,12 @@ onMounted(() => {
   loadCategories()
   loadInquiries()
   loadSiteSetting()
+  loadPlanTypes()
+  loadPlans()
+  loadRecommends()
+  loadOperations()
+  loadProductions()
+  loadItems()
 })
 
 // 추가 함수들
@@ -517,12 +597,186 @@ const saveSiteSetting = async () => {
           <li :class="{ active: activeTab === 'category' }" @click="activeTab = 'category'">카테고리 관리</li>
           <li :class="{ active: activeTab === 'work' }" @click="activeTab = 'work'">최종 영상 (Works)</li>
           <li :class="{ active: activeTab === 'inquiry' }" @click="activeTab = 'inquiry'">문의 내역 관리</li>
+          <li :class="{ active: activeTab === 'plan' }" @click="activeTab = 'plan'">플랜(요금제) 관리</li>
           <li :class="{ active: activeTab === 'siteSetting' }" @click="activeTab = 'siteSetting'">사이트 설정</li>
         </ul>
       </aside>
 
       <!-- 메인 폼 영역 -->
       <main class="profile-panel">
+        
+        <!-- 플랜(요금제) 관리 탭 -->
+        <div v-if="activeTab === 'plan'">
+          <h2 class="panel-title">플랜(요금제) 관리</h2>
+          
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 40px;">
+            <!-- 플랜 종류 -->
+            <div class="section" style="margin-bottom: 0;">
+              <h3>플랜 종류 관리</h3>
+              <div class="form-row" style="margin-bottom: 10px;">
+                <input v-model="formPlanType.name" type="text" placeholder="예: BASIC, GROWTH" class="flex-1" />
+                <button class="btn-submit" @click="addSimpleItem('plan_types', formPlanType, loadPlanTypes)">추가</button>
+              </div>
+              <ul style="list-style:none; padding:0; margin:0; border:1px solid #eee; border-radius:4px; max-height:150px; overflow-y:auto;">
+                <li v-for="item in planTypes" :key="item.id" style="display:flex; justify-content:space-between; padding:8px 10px; border-bottom:1px solid #eee; font-size:13px;">
+                  <span>{{ item.name }}</span>
+                  <button class="btn-delete" @click="deleteSimpleItem('plan_types', item.id, loadPlanTypes)" style="padding:2px 6px;">삭제</button>
+                </li>
+              </ul>
+            </div>
+
+            <!-- 추천 대상 -->
+            <div class="section" style="margin-bottom: 0;">
+              <h3>추천 대상 관리</h3>
+              <div class="form-row" style="margin-bottom: 10px;">
+                <input v-model="formRecommend.name" type="text" placeholder="항목 이름" class="flex-1" />
+                <button class="btn-submit" @click="addSimpleItem('recommends', formRecommend, loadRecommends)">추가</button>
+              </div>
+              <ul style="list-style:none; padding:0; margin:0; border:1px solid #eee; border-radius:4px; max-height:150px; overflow-y:auto;">
+                <li v-for="item in recommends" :key="item.id" style="display:flex; justify-content:space-between; padding:8px 10px; border-bottom:1px solid #eee; font-size:13px;">
+                  <span>{{ item.name }}</span>
+                  <button class="btn-delete" @click="deleteSimpleItem('recommends', item.id, loadRecommends)" style="padding:2px 6px;">삭제</button>
+                </li>
+              </ul>
+            </div>
+            
+            <!-- 운영 목적 -->
+            <div class="section" style="margin-bottom: 0;">
+              <h3>운영 목적 관리</h3>
+              <div class="form-row" style="margin-bottom: 10px;">
+                <input v-model="formOperation.name" type="text" placeholder="항목 이름" class="flex-1" />
+                <button class="btn-submit" @click="addSimpleItem('operations', formOperation, loadOperations)">추가</button>
+              </div>
+              <ul style="list-style:none; padding:0; margin:0; border:1px solid #eee; border-radius:4px; max-height:150px; overflow-y:auto;">
+                <li v-for="item in operations" :key="item.id" style="display:flex; justify-content:space-between; padding:8px 10px; border-bottom:1px solid #eee; font-size:13px;">
+                  <span>{{ item.name }}</span>
+                  <button class="btn-delete" @click="deleteSimpleItem('operations', item.id, loadOperations)" style="padding:2px 6px;">삭제</button>
+                </li>
+              </ul>
+            </div>
+
+            <!-- 촬영 / 편수 -->
+            <div class="section" style="margin-bottom: 0;">
+              <h3>촬영 / 편수 관리</h3>
+              <div class="form-row" style="margin-bottom: 10px;">
+                <input v-model="formProduction.name" type="text" placeholder="항목 이름" class="flex-1" />
+                <button class="btn-submit" @click="addSimpleItem('productions', formProduction, loadProductions)">추가</button>
+              </div>
+              <ul style="list-style:none; padding:0; margin:0; border:1px solid #eee; border-radius:4px; max-height:150px; overflow-y:auto;">
+                <li v-for="item in productions" :key="item.id" style="display:flex; justify-content:space-between; padding:8px 10px; border-bottom:1px solid #eee; font-size:13px;">
+                  <span>{{ item.name }}</span>
+                  <button class="btn-delete" @click="deleteSimpleItem('productions', item.id, loadProductions)" style="padding:2px 6px;">삭제</button>
+                </li>
+              </ul>
+            </div>
+
+            <!-- 제작 항목 -->
+            <div class="section" style="margin-bottom: 0;">
+              <h3>제작 항목 관리</h3>
+              <div class="form-row" style="margin-bottom: 10px;">
+                <input v-model="formItem.name" type="text" placeholder="항목 이름" class="flex-1" />
+                <button class="btn-submit" @click="addSimpleItem('items', formItem, loadItems)">추가</button>
+              </div>
+              <ul style="list-style:none; padding:0; margin:0; border:1px solid #eee; border-radius:4px; max-height:150px; overflow-y:auto;">
+                <li v-for="item in items" :key="item.id" style="display:flex; justify-content:space-between; padding:8px 10px; border-bottom:1px solid #eee; font-size:13px;">
+                  <span>{{ item.name }}</span>
+                  <button class="btn-delete" @click="deleteSimpleItem('items', item.id, loadItems)" style="padding:2px 6px;">삭제</button>
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          <hr style="border:none; border-top:1px solid #eee; margin:40px 0;">
+
+          <div class="section">
+            <h3>새 요금제(Plan) 추가</h3>
+            <div class="form-row" style="margin-bottom:15px;">
+              <div class="form-group flex-1">
+                <label>플랜 종류</label>
+                <select v-model="formPlan.plan_type">
+                  <option :value="null">플랜 종류 선택</option>
+                  <option v-for="pt in planTypes" :key="pt.id" :value="pt.id">{{ pt.name }}</option>
+                </select>
+              </div>
+              <div class="form-group flex-2">
+                <label>플랜명</label>
+                <input v-model="formPlan.name" type="text" placeholder="예: Basic Channel Operation" />
+              </div>
+              <div class="form-group flex-2">
+                <label>서브명</label>
+                <input v-model="formPlan.subname" type="text" placeholder="예: 베이직 채널 운영" />
+              </div>
+              <div class="form-group flex-1">
+                <label>가격(만원)</label>
+                <input v-model="formPlan.price" type="number" placeholder="0" />
+              </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 15px; font-size: 13px;">
+              <div>
+                <label style="font-weight:bold; margin-bottom:5px; display:block;">추천 대상 선택</label>
+                <div style="border:1px solid #eee; padding:10px; border-radius:4px; max-height:100px; overflow-y:auto;">
+                  <label v-for="item in recommends" :key="item.id" style="display:block; cursor:pointer;">
+                    <input type="checkbox" :value="item.id" v-model="formPlan.recommend_ids"> {{ item.name }}
+                  </label>
+                </div>
+              </div>
+              <div>
+                <label style="font-weight:bold; margin-bottom:5px; display:block;">운영 목적 선택</label>
+                <div style="border:1px solid #eee; padding:10px; border-radius:4px; max-height:100px; overflow-y:auto;">
+                  <label v-for="item in operations" :key="item.id" style="display:block; cursor:pointer;">
+                    <input type="checkbox" :value="item.id" v-model="formPlan.operation_ids"> {{ item.name }}
+                  </label>
+                </div>
+              </div>
+              <div>
+                <label style="font-weight:bold; margin-bottom:5px; display:block;">촬영 / 편수 선택</label>
+                <div style="border:1px solid #eee; padding:10px; border-radius:4px; max-height:100px; overflow-y:auto;">
+                  <label v-for="item in productions" :key="item.id" style="display:block; cursor:pointer;">
+                    <input type="checkbox" :value="item.id" v-model="formPlan.production_ids"> {{ item.name }}
+                  </label>
+                </div>
+              </div>
+              <div>
+                <label style="font-weight:bold; margin-bottom:5px; display:block;">제작 항목 선택</label>
+                <div style="border:1px solid #eee; padding:10px; border-radius:4px; max-height:100px; overflow-y:auto;">
+                  <label v-for="item in items" :key="item.id" style="display:block; cursor:pointer;">
+                    <input type="checkbox" :value="item.id" v-model="formPlan.item_ids"> {{ item.name }}
+                  </label>
+                </div>
+              </div>
+            </div>
+            <button class="btn-submit" @click="addPlan">요금제 추가하기</button>
+          </div>
+
+          <div class="section">
+            <h3>등록된 요금제 목록</h3>
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>종류</th>
+                  <th>플랜명</th>
+                  <th>서브명</th>
+                  <th>가격</th>
+                  <th>관리</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="p in plans" :key="p.id">
+                  <td><strong>{{ p.plan_type_name || '미지정' }}</strong></td>
+                  <td>{{ p.name }}</td>
+                  <td>{{ p.subname }}</td>
+                  <td>{{ p.price }}만원</td>
+                  <td><button class="btn-delete" @click="deletePlan(p.id)">삭제</button></td>
+                </tr>
+                <tr v-if="plans.length === 0">
+                  <td colspan="5" class="text-center">등록된 데이터가 없습니다.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
         <!-- 브랜드 클라이언트 탭 -->
         <div v-if="activeTab === 'brandClient'">
           <h2 class="panel-title">브랜드 클라이언트 관리</h2>

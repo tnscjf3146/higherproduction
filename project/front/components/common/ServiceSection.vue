@@ -31,7 +31,7 @@
             <div class="plan-header">
               <div class="plan-badge">
                 <span class="badge-icon">{{ String.fromCharCode(65 + index) }}</span>
-                <span class="badge-text">PLAN {{ String.fromCharCode(65 + index) }} - {{ plan.plan_type }}</span>
+                <span class="badge-text">PLAN {{ String.fromCharCode(65 + index) }} - {{ plan.name }}</span>
               </div>
               <h4 class="plan-name">{{ plan.name }}</h4>
               <p class="plan-subname">{{ plan.subname }}</p>
@@ -78,7 +78,7 @@
                 </div>
               </div>
             </div>
-            <button class="plan-btn" :class="index % 2 === 0 ? 'btn-theme-light' : 'btn-theme-dark'">{{ plan.plan_type }} 문의하기 <span>→</span></button>
+            <button class="plan-btn" :class="index % 2 === 0 ? 'btn-theme-light' : 'btn-theme-dark'"> 문의하기 <span>→</span></button>
           </div>
         </div>
 

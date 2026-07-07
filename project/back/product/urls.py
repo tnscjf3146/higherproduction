@@ -1,6 +1,15 @@
-from django.urls import path
-from .views import PlanListView
+from django.urls import path, include
+from rest_framework.routers import DefaultRouter
+from .views import PlanViewSet, PlanTypeViewSet, RecommendViewSet, OperationViewSet, ProductionViewSet, ItemViewSet
+
+router = DefaultRouter()
+router.register('plan_types', PlanTypeViewSet)
+router.register('plans', PlanViewSet)
+router.register('recommends', RecommendViewSet)
+router.register('operations', OperationViewSet)
+router.register('productions', ProductionViewSet)
+router.register('items', ItemViewSet)
 
 urlpatterns = [
-    path('plans/', PlanListView.as_view(), name='plan_list'),
+    path('', include(router.urls)),
 ]

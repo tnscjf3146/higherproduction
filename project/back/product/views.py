@@ -1,13 +1,34 @@
-from rest_framework.views import APIView
-from rest_framework.response import Response
+from rest_framework import viewsets
 from rest_framework.permissions import AllowAny
-from .models import Plan
-from .serializers import PlanSerializer
+from .models import Plan, PlanType, Recommend, Operation, Production, Item
+from .serializers import PlanSerializer, PlanTypeSerializer, RecommendSerializer, OperationSerializer, ProductionSerializer, ItemSerializer
 
-class PlanListView(APIView):
+class PlanTypeViewSet(viewsets.ModelViewSet):
+    queryset = PlanType.objects.all()
+    serializer_class = PlanTypeSerializer
     permission_classes = [AllowAny]
-    
-    def get(self, request):
-        plans = Plan.objects.all().order_by('price')
-        serializer = PlanSerializer(plans, many=True)
-        return Response(serializer.data)
+
+class PlanViewSet(viewsets.ModelViewSet):
+    queryset = Plan.objects.all().order_by('price')
+    serializer_class = PlanSerializer
+    permission_classes = [AllowAny]
+
+class RecommendViewSet(viewsets.ModelViewSet):
+    queryset = Recommend.objects.all()
+    serializer_class = RecommendSerializer
+    permission_classes = [AllowAny]
+
+class OperationViewSet(viewsets.ModelViewSet):
+    queryset = Operation.objects.all()
+    serializer_class = OperationSerializer
+    permission_classes = [AllowAny]
+
+class ProductionViewSet(viewsets.ModelViewSet):
+    queryset = Production.objects.all()
+    serializer_class = ProductionSerializer
+    permission_classes = [AllowAny]
+
+class ItemViewSet(viewsets.ModelViewSet):
+    queryset = Item.objects.all()
+    serializer_class = ItemSerializer
+    permission_classes = [AllowAny]
