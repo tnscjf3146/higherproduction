@@ -91,6 +91,33 @@
 >&emsp;django-cors-headers &nbsp; CORS 제한 해제<br>
 >&emsp;pillow &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;이미지 처리<br><br>
 
+## 환경 변수 (.env) 설정
+
+프로젝트를 실행하기 위해 `back`과 `front` 폴더 내에 `.env` 파일을 각각 생성해야 합니다.
+
+### back/.env
+```env
+# 허용할 호스트 및 CORS 설정
+DJANGO_ALLOWED_HOSTS=*
+CORS_ALLOWED_ORIGINS=http://localhost:3000
+
+# 이메일 발송 설정 (SMTP)
+EMAIL_HOST=smtp.gmail.com
+EMAIL_PORT=587
+EMAIL_USE_TLS=True
+EMAIL_HOST_USER=your_email@gmail.com
+EMAIL_HOST_PASSWORD=your_app_password
+
+# 유튜브 API 키
+YOUTUBE_API_KEY=your_youtube_api_key
+```
+
+### front/.env
+```env
+# Nuxt 서버에서 통신할 백엔드 API 주소
+NUXT_PUBLIC_API_BASE_URL=http://127.0.0.1:8000
+```
+
 ## 구조
 
 ```

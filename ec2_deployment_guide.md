@@ -1,0 +1,111 @@
+# AWS EC2 배포 가이드라인
+
+현재 프로젝트는 `docker-compose`를 사용하여 백엔드와 프론트엔드가 컨테이너화되어 있으므로, EC2에 배포하는 과정이 비교적 간단합니다. 아래의 순서대로 진행해 주세요.
+
+## 1. AWS EC2 인스턴스 생성 및 설정
+
+1. **EC2 인스턴스 생성**: AWS 콘솔에 접속하여 **Ubuntu Server** (최신 LTS 버전)로 인스턴스를 생성합니다.
+2. **보안 그룹(인바운드 규칙) 설정**: 다음 포트들을 열어주어야 외부에서 접근이 가능합니다.
+   - `SSH` (22): 내 IP 혹은 위치에서 접속하기 위해
+   - `HTTP` (80): Nginx 등을 통해 웹 서비스 시 필요
+   - `HTTPS` (443): SSL(HTTPS) 적용 시 필요
+   - `사용자 지정 TCP` (3000): 프론트엔드 직접 접근 시 (Nginx를 쓴다면 안 열어도 됨)
+   - `사용자 지정 TCP` (8000): 백엔드 직접 접근 시 (Nginx를 쓴다면 안 열어도 됨)
+3. **키 페어(Pem 키)**: 발급받은 키 페어를 안전한 곳에 저장합니다.
+
+## 2. EC2 인스턴스 접속
+
+터미널(또는 PuTTY 등)을 열고 발급받은 키 페어를 이용해 EC2에 SSH로 접속합니다.
+
+```bash
+# 키 파일 권한 설정 (Mac/Linux의 경우)
+chmod 400 your-key.pem
+
+# EC2 접속
+ssh -i "your-key.pem" ubuntu@<EC2-퍼블릭-IP>
+```
+
+## 3. 필수 프로그램 설치 (Docker & Git)
+
+EC2에 접속한 후, 프로젝트를 실행하기 위한 환경을 구성합니다.
+
+```bash
+# 패키지 업데이트
+sudo apt-get update
+sudo apt-get upgrade -y
+
+# Git 설치 (보통 기본 설치되어 있음)
+sudo apt-get install git -y
+
+# Docker 설치
+sudo apt-get install docker.io -y
+
+# Docker Compose 설치
+sudo apt-get install docker-compose -y
+
+# (선택) sudo 없이 docker 명령어를 쓰기 위한 권한 설정 (적용 후 재접속 필요)
+sudo usermod -aG docker ubuntu
+```
+
+## 4. 프로젝트 가져오기 및 환경변수 설정
+
+서버로 프로젝트 파일을 가져오는 방법은 **A) Git Clone 방식**과 **B) 로컬에서 직접 업로드 방식**이 있습니다. 원하시는 방법을 하나 선택해 진행해 주세요.
+
+### 방법 A: Git Clone 방식 (추천)
+GitHub에서 프로젝트를 클론하고, 앞서 만든 `.env` 파일을 서버에서 다시 생성합니다.
+
+```bash
+# 1. 깃허브에서 프로젝트 클론
+git clone https://github.com/tnscjf3146/higherproduction.git
+
+# 2. 프로젝트 폴더로 이동
+cd higherproduction/project
+
+# 3. back 폴더에 .env 파일 생성
+nano back/.env
+# (복사한 백엔드 .env 내용을 붙여넣고 Ctrl+O -> Enter -> Ctrl+X 로 저장)
+
+# 4. front 폴더에 .env 파일 생성
+nano front/.env
+# (복사한 프론트엔드 .env 내용을 붙여넣고 Ctrl+O -> Enter -> Ctrl+X 로 저장)
+```
+
+### 방법 B: 로컬에서 직접 업로드 방식 (`scp` 명령어 활용)
+Git을 거치지 않고, 현재 작업 중인 Windows 로컬 컴퓨터에서 EC2 서버로 폴더를 통째로 전송하는 방법입니다. `.env` 파일까지 모두 한 번에 전송되므로 서버에서 다시 만들 필요가 없습니다.
+
+새로운 Windows 터미널(PowerShell)을 열고, 현재 접속 중이신 환경에 맞춰 아래 명령어를 실행해 주세요. (EC2에 접속된 터미널이 아닌, **내 컴퓨터 터미널**에서 실행해야 합니다)
+
+```powershell
+# 현재 위치: c:\Users\tnscj\Desktop\first
+# higherproduction 폴더 전체를 EC2의 /home/ubuntu 경로로 전송합니다.
+scp -i "ec2/homekey.pem" -r ./higherproduction ubuntu@15.164.221.172:/home/ubuntu/
+```
+
+> **참고**: 터미널 명령어가 익숙하지 않으시다면 **FileZilla(파일질라)** 나 **WinSCP** 같은 무료 프로그램을 설치하여, 마치 폴더에 파일 복사하듯 드래그 앤 드롭으로 업로드하실 수도 있습니다. (접속 시 프로토콜은 SFTP를 선택하고, 호스트에 IP 주소, 사용자에 `ubuntu`, 키 파일에 `.pem` 파일을 등록하시면 됩니다.)
+
+파일 전송이 완료되었다면 EC2 터미널에서 폴더로 이동합니다.
+```bash
+cd higherproduction/project
+```
+
+> [!CAUTION]
+> **중요**: 프론트엔드의 `NUXT_PUBLIC_API_BASE_URL`은 로컬 배포 시 `http://127.0.0.1:8000`이었지만, 실제 배포 환경에서는 백엔드의 **실제 도메인 또는 EC2의 퍼블릭 IP 주소**로 변경해야 합니다. (예: `http://<EC2-퍼블릭-IP>:8000`)
+> 마찬가지로 백엔드의 `CORS_ALLOWED_ORIGINS`에도 프론트엔드의 퍼블릭 주소를 추가해야 합니다.
+
+## 5. 프로젝트 실행
+
+`docker-compose.yml` 파일이 있는 `project` 디렉토리에서 아래 명령어를 실행하여 컨테이너들을 백그라운드에서 빌드하고 실행합니다.
+
+```bash
+sudo docker-compose up --build -d
+```
+
+명령어가 완료되면 아래 주소로 접속하여 정상적으로 켜졌는지 확인합니다.
+- 프론트엔드: `http://<EC2-퍼블릭-IP>:3000`
+- 백엔드(API): `http://<EC2-퍼블릭-IP>:8000`
+
+---
+
+> [!TIP]
+> **추가 권장 사항 (Nginx + HTTPS 적용)**
+> 위와 같이 포트번호(3000)를 붙여서 서비스하는 것보다, 도메인을 연결하고 **Nginx**를 리버스 프록시로 사용하여 80 포트로 접속 시 3000 포트로 연결되게 하는 것이 좋습니다. 추가로 **Certbot(Let's Encrypt)**을 사용해 무료로 HTTPS 통신을 적용할 것을 강력히 권장합니다.

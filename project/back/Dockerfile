@@ -20,4 +20,4 @@ COPY . .
 EXPOSE 8000
 
 # 서버 실행 명령어 (AWS 배포를 위한 gunicorn 사용)
-CMD ["gunicorn", "config.wsgi:application", "--bind", "0.0.0.0:8000"]
+CMD ["sh", "-c", "python manage.py makemigrations && python manage.py migrate && gunicorn config.wsgi:application --bind 0.0.0.0:8000"]
