@@ -140,7 +140,7 @@ const siteSetting = ref({
 
 const loadSiteSetting = async () => {
   try {
-    const data = await $fetch('http://127.0.0.1:8000/system/settings/')
+    const data = await $fetch(useRuntimeConfig().public.apiBaseUrl + '/system/settings/')
     if (data) {
       siteSetting.value = {
         logo_kr: data.logo_kr || '하이어 프로덕션',
@@ -192,7 +192,7 @@ const submitForm = async () => {
       details: form.details
     }
 
-    const res = await fetch('http://127.0.0.1:8000/work/inquiries/', {
+    const res = await fetch(useRuntimeConfig().public.apiBaseUrl + '/work/inquiries/', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)

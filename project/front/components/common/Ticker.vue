@@ -23,7 +23,7 @@ const logoEn = ref('HIGHER PRODUCTION')
 
 const loadSiteSetting = async () => {
   try {
-    const data = await $fetch('http://127.0.0.1:8000/system/settings/')
+    const data = await $fetch(useRuntimeConfig().public.apiBaseUrl + '/system/settings/')
     if (data && data.logo_en) {
       logoEn.value = data.logo_en
     }

@@ -84,7 +84,7 @@ const handleSignup = async () => {
   isLoading.value = true
   
   try {
-    const response = await $fetch('http://127.0.0.1:8000/account/signup/', {
+    const response = await $fetch(useRuntimeConfig().public.apiBaseUrl + '/account/signup/', {
       method: 'POST',
       body: {
         username: form.username,

@@ -72,7 +72,7 @@ const handleFindId = async () => {
   isLoading.value = true
   
   try {
-    const response = await $fetch('http://127.0.0.1:8000/account/find-id/', {
+    const response = await $fetch(useRuntimeConfig().public.apiBaseUrl + '/account/find-id/', {
       method: 'POST',
       body: { email: idForm.email }
     })
@@ -95,7 +95,7 @@ const handleFindPassword = async () => {
   isLoading.value = true
   
   try {
-    const response = await $fetch('http://127.0.0.1:8000/account/password-reset/', {
+    const response = await $fetch(useRuntimeConfig().public.apiBaseUrl + '/account/password-reset/', {
       method: 'POST',
       body: { username: pwForm.username, email: pwForm.email }
     })

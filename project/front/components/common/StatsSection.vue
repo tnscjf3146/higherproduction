@@ -2,7 +2,7 @@
 import { useFetch } from '#app'
 
 // 백엔드 API에서 통계 정보 가져오기 (만약 실패하거나 로딩 중이면 기본 0으로 표시)
-const { data: stats } = await useFetch('http://127.0.0.1:8000/work/stats/', {
+const { data: stats } = await useFetch(useRuntimeConfig().public.apiBaseUrl + '/work/stats/', {
   default: () => ({
     projects_count: 0,
     final_cuts_count: 0,

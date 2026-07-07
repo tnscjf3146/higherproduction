@@ -89,28 +89,28 @@ const formPlan = ref({
 
 // 플랜 관련 데이터 불러오기
 const loadPlans = async () => {
-  try { plans.value = await $fetch('http://127.0.0.1:8000/product/plans/') } catch (e) { console.error(e) }
+  try { plans.value = await $fetch(useRuntimeConfig().public.apiBaseUrl + '/product/plans/') } catch (e) { console.error(e) }
 }
 const loadPlanTypes = async () => {
-  try { planTypes.value = await $fetch('http://127.0.0.1:8000/product/plan_types/') } catch (e) { console.error(e) }
+  try { planTypes.value = await $fetch(useRuntimeConfig().public.apiBaseUrl + '/product/plan_types/') } catch (e) { console.error(e) }
 }
 const loadRecommends = async () => {
-  try { recommends.value = await $fetch('http://127.0.0.1:8000/product/recommends/') } catch (e) { console.error(e) }
+  try { recommends.value = await $fetch(useRuntimeConfig().public.apiBaseUrl + '/product/recommends/') } catch (e) { console.error(e) }
 }
 const loadOperations = async () => {
-  try { operations.value = await $fetch('http://127.0.0.1:8000/product/operations/') } catch (e) { console.error(e) }
+  try { operations.value = await $fetch(useRuntimeConfig().public.apiBaseUrl + '/product/operations/') } catch (e) { console.error(e) }
 }
 const loadProductions = async () => {
-  try { productions.value = await $fetch('http://127.0.0.1:8000/product/productions/') } catch (e) { console.error(e) }
+  try { productions.value = await $fetch(useRuntimeConfig().public.apiBaseUrl + '/product/productions/') } catch (e) { console.error(e) }
 }
 const loadItems = async () => {
-  try { items.value = await $fetch('http://127.0.0.1:8000/product/items/') } catch (e) { console.error(e) }
+  try { items.value = await $fetch(useRuntimeConfig().public.apiBaseUrl + '/product/items/') } catch (e) { console.error(e) }
 }
 
 const addSimpleItem = async (endpoint, formData, reloadFunc) => {
   if (!formData.name) return alert('항목 이름을 입력해주세요.')
   try {
-    await $fetch(`http://127.0.0.1:8000/product/${endpoint}/`, { method: 'POST', body: { name: formData.name } })
+    await $fetch(`${useRuntimeConfig().public.apiBaseUrl}/product/${endpoint}/`, { method: 'POST', body: { name: formData.name } })
     formData.name = ''
     reloadFunc()
   } catch (e) { console.error(e); alert('추가 실패') }
@@ -118,7 +118,7 @@ const addSimpleItem = async (endpoint, formData, reloadFunc) => {
 const deleteSimpleItem = async (endpoint, id, reloadFunc) => {
   if (!confirm('정말 삭제하시겠습니까?')) return
   try {
-    await $fetch(`http://127.0.0.1:8000/product/${endpoint}/${id}/`, { method: 'DELETE' })
+    await $fetch(`${useRuntimeConfig().public.apiBaseUrl}/product/${endpoint}/${id}/`, { method: 'DELETE' })
     reloadFunc()
   } catch (e) { console.error(e); alert('삭제 실패') }
 }
@@ -126,7 +126,7 @@ const deleteSimpleItem = async (endpoint, id, reloadFunc) => {
 const addPlan = async () => {
   if (!formPlan.value.name || formPlan.value.price === null) return alert('플랜명과 가격을 입력해주세요.')
   try {
-    await $fetch('http://127.0.0.1:8000/product/plans/', {
+    await $fetch(useRuntimeConfig().public.apiBaseUrl + '/product/plans/', {
       method: 'POST',
       body: formPlan.value
     })
@@ -138,7 +138,7 @@ const addPlan = async () => {
 const deletePlan = async (id) => {
   if (!confirm('정말 삭제하시겠습니까?')) return
   try {
-    await $fetch(`http://127.0.0.1:8000/product/plans/${id}/`, { method: 'DELETE' })
+    await $fetch(`${useRuntimeConfig().public.apiBaseUrl}/product/plans/${id}/`, { method: 'DELETE' })
     loadPlans()
   } catch (e) { console.error(e); alert('삭제 실패') }
 }
@@ -146,32 +146,32 @@ const deletePlan = async (id) => {
 // 데이터 불러오기 함수
 const loadBrandClients = async () => {
   try {
-    brandClients.value = await $fetch('http://127.0.0.1:8000/work/admin/brandclients/')
+    brandClients.value = await $fetch(useRuntimeConfig().public.apiBaseUrl + '/work/admin/brandclients/')
   } catch (e) { console.error(e) }
 }
 const loadProjects = async () => {
   try {
-    projects.value = await $fetch('http://127.0.0.1:8000/work/admin/projects/')
+    projects.value = await $fetch(useRuntimeConfig().public.apiBaseUrl + '/work/admin/projects/')
   } catch (e) { console.error(e) }
 }
 const loadWorks = async () => {
   try {
-    works.value = await $fetch('http://127.0.0.1:8000/work/admin/works/')
+    works.value = await $fetch(useRuntimeConfig().public.apiBaseUrl + '/work/admin/works/')
   } catch (e) { console.error(e) }
 }
 const loadCategories = async () => {
   try {
-    categories.value = await $fetch('http://127.0.0.1:8000/work/admin/categories/')
+    categories.value = await $fetch(useRuntimeConfig().public.apiBaseUrl + '/work/admin/categories/')
   } catch (e) { console.error(e) }
 }
 const loadInquiries = async () => {
   try {
-    inquiries.value = await $fetch('http://127.0.0.1:8000/work/inquiries/')
+    inquiries.value = await $fetch(useRuntimeConfig().public.apiBaseUrl + '/work/inquiries/')
   } catch (e) { console.error(e) }
 }
 const loadSiteSetting = async () => {
   try {
-    const data = await $fetch('http://127.0.0.1:8000/system/settings/')
+    const data = await $fetch(useRuntimeConfig().public.apiBaseUrl + '/system/settings/')
     let headings = data.about_headings
     if (!headings || headings.length === 0) {
       headings = [
@@ -235,7 +235,7 @@ onMounted(() => {
 const addBrandClient = async () => {
   if (!formBc.value.name) return alert('브랜드명을 입력해주세요.')
   try {
-    await $fetch('http://127.0.0.1:8000/work/admin/brandclients/', {
+    await $fetch(useRuntimeConfig().public.apiBaseUrl + '/work/admin/brandclients/', {
       method: 'POST',
       body: { 
         name: formBc.value.name,
@@ -253,7 +253,7 @@ const addBrandClient = async () => {
 
 const deleteBrandClient = async (id) => {
   if (!confirm('정말 삭제하시겠습니까?')) return
-  await $fetch(`http://127.0.0.1:8000/work/admin/brandclients/${id}/`, { method: 'DELETE' })
+  await $fetch(`${useRuntimeConfig().public.apiBaseUrl}/work/admin/brandclients/${id}/`, { method: 'DELETE' })
   loadBrandClients()
 }
 
@@ -272,7 +272,7 @@ const cancelEditingBrandClient = () => {
 
 const saveBrandClient = async () => {
   try {
-    await $fetch(`http://127.0.0.1:8000/work/admin/brandclients/${editingBrandClientData.value.id}/`, {
+    await $fetch(`${useRuntimeConfig().public.apiBaseUrl}/work/admin/brandclients/${editingBrandClientData.value.id}/`, {
       method: 'PATCH',
       body: { 
         name: editingBrandClientData.value.name,
@@ -293,7 +293,7 @@ const saveBrandClient = async () => {
 const addCategory = async () => {
   if (!formCategory.value.name) return alert('카테고리명을 입력해주세요.')
   try {
-    await $fetch('http://127.0.0.1:8000/work/admin/categories/', {
+    await $fetch(useRuntimeConfig().public.apiBaseUrl + '/work/admin/categories/', {
       method: 'POST',
       body: { 
         name: formCategory.value.name,
@@ -328,7 +328,7 @@ const cancelEditingCategory = () => {
 
 const saveCategory = async () => {
   try {
-    await $fetch(`http://127.0.0.1:8000/work/admin/categories/${editingCategoryData.value.id}/`, {
+    await $fetch(`${useRuntimeConfig().public.apiBaseUrl}/work/admin/categories/${editingCategoryData.value.id}/`, {
       method: 'PATCH',
       body: { 
         name: editingCategoryData.value.name,
@@ -349,14 +349,14 @@ const saveCategory = async () => {
 
 const deleteCategory = async (id) => {
   if (!confirm('정말 삭제하시겠습니까? 관련 영상의 카테고리가 비워질 수 있습니다.')) return
-  await $fetch(`http://127.0.0.1:8000/work/admin/categories/${id}/`, { method: 'DELETE' })
+  await $fetch(`${useRuntimeConfig().public.apiBaseUrl}/work/admin/categories/${id}/`, { method: 'DELETE' })
   loadCategories()
 }
 
 const addProject = async () => {
   if (!formProject.value.title) return alert('프로젝트명을 입력해주세요.')
   try {
-    await $fetch('http://127.0.0.1:8000/work/admin/projects/', {
+    await $fetch(useRuntimeConfig().public.apiBaseUrl + '/work/admin/projects/', {
       method: 'POST',
       body: { 
         title: formProject.value.title,
@@ -375,7 +375,7 @@ const addProject = async () => {
 
 const deleteProject = async (id) => {
   if (!confirm('정말 삭제하시겠습니까?')) return
-  await $fetch(`http://127.0.0.1:8000/work/admin/projects/${id}/`, { method: 'DELETE' })
+  await $fetch(`${useRuntimeConfig().public.apiBaseUrl}/work/admin/projects/${id}/`, { method: 'DELETE' })
   loadProjects()
 }
 
@@ -395,7 +395,7 @@ const cancelEditingProject = () => {
 
 const saveProject = async () => {
   try {
-    await $fetch(`http://127.0.0.1:8000/work/admin/projects/${editingProjectData.value.id}/`, {
+    await $fetch(`${useRuntimeConfig().public.apiBaseUrl}/work/admin/projects/${editingProjectData.value.id}/`, {
       method: 'PATCH',
       body: { 
         title: editingProjectData.value.title,
@@ -419,7 +419,7 @@ const fetchYoutubeInfo = async () => {
     return alert('유튜브 링크를 먼저 입력해주세요.')
   }
   try {
-    const data = await $fetch(`http://127.0.0.1:8000/work/admin/youtube-info/?url=${encodeURIComponent(formWork.value.youtube_link)}`)
+    const data = await $fetch(`${useRuntimeConfig().public.apiBaseUrl}/work/admin/youtube-info/?url=${encodeURIComponent(formWork.value.youtube_link)}`)
     if (data.title) {
       formWork.value.title = data.title
       formWork.value.thumbnail_url = data.thumbnail_url
@@ -437,7 +437,7 @@ const searchYoutube = async () => {
   searchResults.value = []
   
   try {
-    const data = await $fetch(`http://127.0.0.1:8000/work/admin/youtube-search/?q=${encodeURIComponent(searchQuery.value)}`)
+    const data = await $fetch(`${useRuntimeConfig().public.apiBaseUrl}/work/admin/youtube-search/?q=${encodeURIComponent(searchQuery.value)}`)
     if (data.error) {
       alert(data.error)
     } else {
@@ -466,7 +466,7 @@ const addWork = async () => {
   if (!formWork.value.category) return alert('카테고리를 선택해주세요.')
   
   try {
-    await $fetch('http://127.0.0.1:8000/work/admin/works/', {
+    await $fetch(useRuntimeConfig().public.apiBaseUrl + '/work/admin/works/', {
       method: 'POST',
       body: { 
         title: formWork.value.title,
@@ -489,14 +489,14 @@ const addWork = async () => {
 
 const deleteWork = async (id) => {
   if (!confirm('정말 삭제하시겠습니까?')) return
-  await $fetch(`http://127.0.0.1:8000/work/admin/works/${id}/`, { method: 'DELETE' })
+  await $fetch(`${useRuntimeConfig().public.apiBaseUrl}/work/admin/works/${id}/`, { method: 'DELETE' })
   loadWorks()
 }
 
 // 영상 상태/공개여부 실시간 수정
 const updateWorkStatus = async (work) => {
   try {
-    await $fetch(`http://127.0.0.1:8000/work/admin/works/${work.id}/`, {
+    await $fetch(`${useRuntimeConfig().public.apiBaseUrl}/work/admin/works/${work.id}/`, {
       method: 'PATCH',
       body: { status: work.status }
     })
@@ -509,7 +509,7 @@ const updateWorkStatus = async (work) => {
 
 const updateWorkVisibility = async (work) => {
   try {
-    await $fetch(`http://127.0.0.1:8000/work/admin/works/${work.id}/`, {
+    await $fetch(`${useRuntimeConfig().public.apiBaseUrl}/work/admin/works/${work.id}/`, {
       method: 'PATCH',
       body: { is_visible: work.is_visible }
     })
@@ -539,14 +539,14 @@ const closeVideo = () => {
 // 문의 내역 삭제
 const deleteInquiry = async (id) => {
   if (!confirm('정말 삭제하시겠습니까?')) return
-  await $fetch(`http://127.0.0.1:8000/work/inquiries/${id}/`, { method: 'DELETE' })
+  await $fetch(`${useRuntimeConfig().public.apiBaseUrl}/work/inquiries/${id}/`, { method: 'DELETE' })
   loadInquiries()
 }
 
 // 문의 읽음 처리
 const toggleInquiryRead = async (inq) => {
   try {
-    await $fetch(`http://127.0.0.1:8000/work/inquiries/${inq.id}/`, {
+    await $fetch(`${useRuntimeConfig().public.apiBaseUrl}/work/inquiries/${inq.id}/`, {
       method: 'PATCH',
       body: { is_read: !inq.is_read }
     })
@@ -559,7 +559,7 @@ const toggleInquiryRead = async (inq) => {
 // 문의 상태 변경 (미접수, 처리 중, 처리 완료)
 const updateInquiryStatus = async (inq) => {
   try {
-    await $fetch(`http://127.0.0.1:8000/work/inquiries/${inq.id}/`, {
+    await $fetch(`${useRuntimeConfig().public.apiBaseUrl}/work/inquiries/${inq.id}/`, {
       method: 'PATCH',
       body: { status: inq.status }
     })
@@ -573,7 +573,7 @@ const updateInquiryStatus = async (inq) => {
 // 사이트 설정 저장
 const saveSiteSetting = async () => {
   try {
-    await $fetch('http://127.0.0.1:8000/system/settings/', {
+    await $fetch(useRuntimeConfig().public.apiBaseUrl + '/system/settings/', {
       method: 'PATCH',
       body: siteSetting.value
     })

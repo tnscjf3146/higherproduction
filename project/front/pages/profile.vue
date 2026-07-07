@@ -164,7 +164,7 @@ onMounted(async () => {
   }
   
   try {
-    const response = await $fetch('http://127.0.0.1:8000/account/profile/', {
+    const response = await $fetch(useRuntimeConfig().public.apiBaseUrl + '/account/profile/', {
       method: 'GET',
       headers: {
         Authorization: `Bearer ${authStore.accessToken}`
@@ -204,7 +204,7 @@ const handleUpdateProfile = async () => {
   isUpdating.value = true
   
   try {
-    const response = await $fetch('http://127.0.0.1:8000/account/profile/', {
+    const response = await $fetch(useRuntimeConfig().public.apiBaseUrl + '/account/profile/', {
       method: 'PUT',
       headers: {
         Authorization: `Bearer ${authStore.accessToken}`

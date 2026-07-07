@@ -267,7 +267,7 @@ onMounted(async () => {
   window.addEventListener('resize', handleResize)
 
   try {
-    const data = await $fetch('http://127.0.0.1:8000/work/categories/')
+    const data = await $fetch(useRuntimeConfig().public.apiBaseUrl + '/work/categories/')
     categories.value = data.map((cat, index) => {
       cat.displayIndex = String(index + 1).padStart(2, '0')
       return cat

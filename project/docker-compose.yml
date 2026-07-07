@@ -1,0 +1,25 @@
+version: '3.8'
+
+services:
+  back:
+    build: 
+      context: ./back
+      dockerfile: Dockerfile
+    container_name: higher_back
+    ports:
+      - "8000:8000"
+    restart: always
+    env_file:
+      - ./back/.env
+    # 만약 db.sqlite3를 유지하려면 아래 볼륨 설정의 주석을 해제하세요.
+    # volumes:
+    #   - ./back/db.sqlite3:/app/db.sqlite3
+
+  front:
+    build: 
+      context: ./front
+      dockerfile: Dockerfile
+    container_name: higher_front
+    ports:
+      - "3000:3000"
+    restart: always

@@ -158,7 +158,7 @@ const siteSetting = ref({
 
 const loadSiteSetting = async () => {
   try {
-    const data = await $fetch('http://127.0.0.1:8000/system/settings/')
+    const data = await $fetch(useRuntimeConfig().public.apiBaseUrl + '/system/settings/')
     if (data && data.logo_kr) {
       siteSetting.value.logo_kr = data.logo_kr
     }
@@ -170,7 +170,7 @@ const loadSiteSetting = async () => {
 onMounted(async () => {
   loadSiteSetting()
   try {
-    const data = await $fetch('http://127.0.0.1:8000/product/plans/')
+    const data = await $fetch(useRuntimeConfig().public.apiBaseUrl + '/product/plans/')
     plans.value = data
   } catch (error) {
     console.error('Failed to load plans:', error)

@@ -58,7 +58,7 @@
       <div>
         <div class="meta-title">
           <p>We make work</p>
-          <p>that <span style="color: var(--primary-color);">raises</span> the bar.</p>
+          <p>that <span style="color: var(--primary-deep-color);">raises</span> the bar.</p>
         </div>
         <div class="meta-context">
           <p>

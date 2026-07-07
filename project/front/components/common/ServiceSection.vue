@@ -135,7 +135,7 @@ const scrollTo = (index) => {
 
 onMounted(async () => {
   try {
-    const data = await $fetch('http://127.0.0.1:8000/product/plans/')
+    const data = await $fetch(useRuntimeConfig().public.apiBaseUrl + '/product/plans/')
     plans.value = data
   } catch (err) {
     console.error('Failed to load plans:', err)

@@ -71,7 +71,7 @@ const handleReset = async () => {
   isLoading.value = true
   
   try {
-    const response = await $fetch('http://127.0.0.1:8000/account/password-reset/confirm/', {
+    const response = await $fetch(useRuntimeConfig().public.apiBaseUrl + '/account/password-reset/confirm/', {
       method: 'POST',
       body: {
         uid: uid.value,

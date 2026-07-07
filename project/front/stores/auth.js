@@ -9,7 +9,7 @@ export const useAuthStore = defineStore('auth', () => {
     const login = async (username, password) => {
         try {
             // Nuxt 내장 $fetch를 사용하여 Django(8000포트)와 통신
-            const response = await $fetch('http://127.0.0.1:8000/account/login/', {
+            const response = await $fetch(useRuntimeConfig().public.apiBaseUrl + '/account/login/', {
                 method: 'POST',
                 body: {
                     username,
