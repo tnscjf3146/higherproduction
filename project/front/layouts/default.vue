@@ -135,8 +135,8 @@ const handleAuthClick = (event, path, isMobile) => {
 const publicMenuItems = [
   { name: 'WORKS', path: '/works' },
   { name: 'SERVICES', path: '/services' },
-  { name: 'ABOUT', path: '/about' },
-  { name: 'CONTACT', path: '/contact' }
+  { name: 'CONTACT', path: '/contact' },
+  // { name: 'ABOUT', path: '/about' },
 ]
 
 // 2. 관리자 전용 메뉴

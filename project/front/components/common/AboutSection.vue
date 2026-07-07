@@ -186,8 +186,9 @@ onMounted(() => {
 
 .logo-img {
   margin: auto;
-  height: 80px; 
-  width: auto;
+  /* 화면 너비에 따라 동적으로 변하게 설정 (최소 150px, 화면의 25%, 최대 450px) */
+  width: clamp(200px, 25vw, 350px);
+  height: auto;
   /* 파란색 로고를 완전히 흰색으로 만들기 위한 필터 */
   filter: brightness(0) invert(1); 
 }

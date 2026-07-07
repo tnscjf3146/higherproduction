@@ -68,6 +68,12 @@
       </div>
       <CommonTicker></CommonTicker>
       
+      <!-- 새로 추가된 Works 섹션 -->
+      <CommonWorksSection :section-index="worksIndexStr" />
+
+      <!-- 새로 추가된 Stats 섹션 -->
+      <CommonStatsSection />
+
       <!-- 새로 추가된 Service 섹션 -->
       <CommonServiceSection 
         v-if="siteStore.settings.is_service_visible"
@@ -76,8 +82,6 @@
         :desc="siteStore.settings.service_desc"
       />
 
-      <!-- 새로 추가된 Stats 섹션 -->
-      <CommonStatsSection />
 
       <!-- 새로 추가된 About 섹션 -->
       <CommonAboutSection 
@@ -99,13 +103,15 @@ const siteStore = useSiteStore()
 
 const currentStage = ref(0)
 
+const worksIndexStr = computed(() => '01')
+
 const serviceIndexStr = computed(() => {
-  return siteStore.settings.is_service_visible ? '01' : ''
+  return siteStore.settings.is_service_visible ? '02' : ''
 })
 
 const aboutIndexStr = computed(() => {
   if (!siteStore.settings.is_about_visible) return ''
-  return siteStore.settings.is_service_visible ? '02' : '01'
+  return siteStore.settings.is_service_visible ? '03' : '02'
 })
 
 /* 실시간 시계 로직 */
@@ -313,7 +319,7 @@ onUnmounted(() => {
 }
 
 .stage-logo-img{
-  width: clamp(800px, 65%, 1600px);
+  width: clamp(320px, 65%, 1600px);
   height: auto;
   display: block;
   object-fit: contain;

@@ -58,6 +58,7 @@ const padZero = (num) => num < 10 ? `0${num}` : num
   background-color: #fafafa;
   padding: 80px 40px;
   border-top: 1px solid #eaeaea;
+  border-bottom: 1px solid #eaeaea;
   font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, 'Helvetica Neue', 'Segoe UI', 'Apple SD Gothic Neo', 'Noto Sans KR', 'Malgun Gothic', sans-serif;
 }
 
