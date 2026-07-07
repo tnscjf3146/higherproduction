@@ -184,7 +184,7 @@ onMounted(async () => {
     grid-template-columns: 1fr;
   }
   .header-title {
-    font-size: 32px;
+    font-size: 14px;
   }
 }
 

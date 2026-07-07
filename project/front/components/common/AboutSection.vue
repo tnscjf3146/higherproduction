@@ -80,14 +80,19 @@ const aboutHeadings = ref([
   { text: '우상향 프로덕션', is_highlighted: false }
 ])
 
+watchEffect(() => {
+  if (siteStore.settings?.about_headings?.length > 0) {
+    aboutHeadings.value = siteStore.settings.about_headings
+  }
+})
+
 const loadSiteSetting = async () => {
   try {
-    const data = await $fetch(useRuntimeConfig().public.apiBaseUrl + '/system/settings/')
-    if (data && data.about_headings && data.about_headings.length > 0) {
-      aboutHeadings.value = data.about_headings
+    if (!siteStore.isLoaded) {
+      await siteStore.fetchSettings()
     }
-  } catch (e) {
-    console.error('Failed to load site setting:', e)
+  } catch (error) {
+    console.error('Failed to load settings:', error)
   }
 }
 
