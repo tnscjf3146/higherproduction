@@ -14,7 +14,7 @@ class SiteSetting(models.Model):
     phone = models.CharField(max_length=50, blank=True, null=True, verbose_name="스튜디오 전화번호", default="+82 10-0000-0000")
     address = models.CharField(max_length=255, blank=True, null=True, verbose_name="스튜디오 주소", default="우리집")
     instagram_handle = models.CharField(max_length=100, blank=True, null=True, verbose_name="인스타그램 핸들", default="인스타핸들")
-    instagram_url = models.URLField(max_length=255, blank=True, null=True, verbose_name="인스타그램 주소", default="https://인스타_주소")
+    instagram_url = models.URLField(max_length=255, blank=True, null=True, verbose_name="인스타그램 주소", default="https://www.naver.com/")
     
     # --- Service Section Config ---
     is_service_visible = models.BooleanField(default=True, verbose_name="Service 노출 여부")
