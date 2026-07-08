@@ -1,11 +1,9 @@
 from django.db import models
 from django.conf import settings
 
-class Category(models.Model):
-    name = models.CharField(max_length=100, verbose_name='카테고리명')
-    subtitle = models.CharField(max_length=100, blank=True, null=True, verbose_name='카테고리 소제목')
+class MainCategory(models.Model):
+    name = models.CharField(max_length=100, verbose_name='대분류명')
     order = models.IntegerField(default=0, verbose_name='노출 순서(낮을수록 먼저 보임)')
-    is_vertical = models.BooleanField(default=False, verbose_name='세로형(쇼츠) 여부')
 
     class Meta:
         ordering = ['order']
@@ -13,13 +11,25 @@ class Category(models.Model):
     def __str__(self):
         return self.name
 
+class SubCategory(models.Model):
+    main_category = models.ForeignKey(MainCategory, on_delete=models.CASCADE, related_name='sub_categories', verbose_name='대분류')
+    name = models.CharField(max_length=100, verbose_name='중분류명(채널명)')
+    order = models.IntegerField(default=0, verbose_name='노출 순서(낮을수록 먼저 보임)')
+    is_vertical = models.BooleanField(default=False, verbose_name='세로형(쇼츠) 여부')
+
+    class Meta:
+        ordering = ['main_category__order', 'order']
+
+    def __str__(self):
+        return f"[{self.main_category.name}] {self.name}"
+
 class Work(models.Model):
     STATUS_CHOICES = (
         ('IN_PROGRESS', '작업중'),
         ('COMPLETED', '완료됨'),
     )
     
-    category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True, blank=True, related_name='works', verbose_name='카테고리')
+    sub_category = models.ForeignKey(SubCategory, on_delete=models.SET_NULL, null=True, blank=True, related_name='works', verbose_name='중분류')
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name='works', verbose_name='관련 고객')
     title = models.CharField(max_length=255, verbose_name='작품명')
     youtube_link = models.URLField(verbose_name='영상 링크', blank=True, null=True)
@@ -61,6 +71,7 @@ class Inquiry(models.Model):
     phone = models.CharField(max_length=20, verbose_name='연락처')
     email = models.EmailField(blank=True, null=True, verbose_name='이메일')
     category = models.CharField(max_length=100, blank=True, null=True, verbose_name='카테고리')
+    plans = models.ManyToManyField('product.Plan', blank=True, related_name='inquiries', verbose_name='문의 플랜(다중선택)')
     budget = models.CharField(max_length=100, blank=True, null=True, verbose_name='예산')
     details = models.TextField(blank=True, null=True, verbose_name='상세 요청사항')
     created_at = models.DateTimeField(auto_now_add=True, verbose_name='등록일')

@@ -1,12 +1,13 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from .views import CategoryListView, StatsAPIView, BrandClientViewSet, ProjectViewSet, WorkViewSet, CategoryViewSet, YouTubeInfoAPIView, YouTubeSearchAPIView, InquiryViewSet
+from .views import CategoryListView, StatsAPIView, BrandClientViewSet, ProjectViewSet, WorkViewSet, MainCategoryViewSet, SubCategoryViewSet, YouTubeInfoAPIView, YouTubeSearchAPIView, InquiryViewSet
 
 router = DefaultRouter()
 router.register(r'admin/brandclients', BrandClientViewSet, basename='admin-brandclient')
 router.register(r'admin/projects', ProjectViewSet, basename='admin-project')
 router.register(r'admin/works', WorkViewSet, basename='admin-work')
-router.register(r'admin/categories', CategoryViewSet, basename='admin-category')
+router.register(r'admin/main-categories', MainCategoryViewSet, basename='admin-main-category')
+router.register(r'admin/sub-categories', SubCategoryViewSet, basename='admin-sub-category')
 router.register(r'inquiries', InquiryViewSet, basename='inquiry')
 
 urlpatterns = [

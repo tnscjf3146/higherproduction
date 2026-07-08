@@ -16,12 +16,12 @@
       </div>
 
       <div v-else>
-        <!-- 카테고리 필터 영역 -->
-        <div class="category-filters">
+        <!-- 카테고리 필터 영역 (1차 탭) -->
+        <div class="category-filters main-filters">
           <button 
             class="filter-btn" 
             :class="{ active: selectedCategory === 'ALL' }" 
-            @click="selectedCategory = 'ALL'"
+            @click="setCategory('ALL')"
           >
             <span class="filter-name">ALL</span>
           </button>
@@ -30,11 +30,33 @@
             :key="cat.id" 
             class="filter-btn"
             :class="{ active: selectedCategory === cat.id }"
-            @click="selectedCategory = cat.id"
+            @click="setCategory(cat.id)"
           >
             <span class="filter-name">{{ cat.name }}</span>
           </button>
         </div>
+
+        <!-- 서브 카테고리 필터 영역 (2차 탭) -->
+        <transition name="slide-fade">
+          <div v-if="selectedCategory !== 'ALL' && activeSubCategories.length > 0" class="sub-category-filters">
+            <button 
+              class="sub-filter-btn" 
+              :class="{ active: selectedSubCategory === 'ALL' }"
+              @click="selectedSubCategory = 'ALL'"
+            >
+              전체
+            </button>
+            <button 
+              v-for="sub in activeSubCategories" 
+              :key="sub.id" 
+              class="sub-filter-btn"
+              :class="{ active: selectedSubCategory === sub.id }"
+              @click="selectedSubCategory = sub.id"
+            >
+              {{ sub.name }}
+            </button>
+          </div>
+        </transition>
 
         <div class="categories-container">
           <div 
@@ -51,7 +73,6 @@
             <div v-if="category.works && category.works.length > 0" class="carousel-container">
               <!-- 왼쪽 화살표 -->
               <button 
-                v-if="getTotalPages(category) > 1"
                 class="nav-arrow left-arrow" 
                 :disabled="(categoryPages[category.id] || 1) === 1" 
                 @click="changePage(category.id, (categoryPages[category.id] || 1) - 1)"
@@ -103,7 +124,6 @@
 
               <!-- 오른쪽 화살표 -->
               <button 
-                v-if="getTotalPages(category) > 1"
                 class="nav-arrow right-arrow" 
                 :disabled="(categoryPages[category.id] || 1) >= getTotalPages(category)" 
                 @click="changePage(category.id, (categoryPages[category.id] || 1) + 1)"
@@ -137,22 +157,72 @@ const props = defineProps({
 const isLoading = ref(true)
 const categories = ref([])
 const selectedCategory = ref('ALL')
+const selectedSubCategory = ref('ALL')
 const playingWorkId = ref(null)
 
 const categoryPages = ref({})
 const slideDirection = ref('slide-right')
 
-watch(selectedCategory, () => {
-  categories.value.forEach(cat => {
-    categoryPages.value[cat.id] = 1
-  })
+const setCategory = (catId) => {
+  selectedCategory.value = catId
+  selectedSubCategory.value = 'ALL'
+}
+
+const activeSubCategories = computed(() => {
+  if (selectedCategory.value === 'ALL') return []
+  const main = categories.value.find(c => c.id === selectedCategory.value)
+  return main && main.sub_categories ? main.sub_categories : []
 })
 
 const filteredCategories = computed(() => {
+  let result = []
   if (selectedCategory.value === 'ALL') {
-    return categories.value
+    categories.value.forEach(main => {
+      let mergedWorks = []
+      if (main.sub_categories) {
+        main.sub_categories.forEach(sub => {
+          if (sub.works) mergedWorks.push(...sub.works)
+        })
+      }
+      mergedWorks.sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+      const isVertical = main.sub_categories && main.sub_categories.some(sub => sub.is_vertical)
+      
+      if (mergedWorks.length > 0 || categories.value.length === 1) {
+        result.push({
+          id: `main-${main.id}`,
+          name: main.name,
+          is_vertical: isVertical,
+          works: mergedWorks
+        })
+      }
+    })
+  } else {
+    const main = categories.value.find(c => c.id === selectedCategory.value)
+    if (main && main.sub_categories) {
+      if (selectedSubCategory.value === 'ALL') {
+        // 개별 중분류 섹션들만 표시
+        main.sub_categories.forEach(sub => {
+          if (sub.works && sub.works.length > 0) {
+            result.push(sub)
+          }
+        })
+      } else {
+        // 특정 중분류 선택 시 해당 중분류만 표시
+        const sub = main.sub_categories.find(s => s.id === selectedSubCategory.value)
+        if (sub && sub.works && sub.works.length > 0) result.push(sub)
+      }
+    }
   }
-  return categories.value.filter(cat => cat.id === selectedCategory.value)
+  result.forEach((cat, index) => {
+    cat.displayIndex = String(index + 1).padStart(2, '0')
+  })
+  return result
+})
+
+watch([selectedCategory, selectedSubCategory], () => {
+  filteredCategories.value.forEach(cat => {
+    categoryPages.value[cat.id] = 1
+  })
 })
 
 const getPageSize = (isVertical) => {
@@ -219,11 +289,8 @@ const openVideo = (workId, url) => {
 onMounted(async () => {
   try {
     const data = await $fetch(useRuntimeConfig().public.apiBaseUrl + '/work/categories/')
-    categories.value = data.map((cat, index) => {
-      cat.displayIndex = String(index + 1).padStart(2, '0')
-      return cat
-    })
-    categories.value.forEach(cat => {
+    categories.value = data
+    filteredCategories.value.forEach(cat => {
       categoryPages.value[cat.id] = 1
     })
   } catch (error) {
@@ -302,7 +369,55 @@ onMounted(async () => {
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
+  margin-bottom: 20px;
+}
+
+.sub-category-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
   margin-bottom: 30px;
+  padding-left: 10px;
+}
+
+/* 2차 탭 애니메이션 (Slide down + Fade in) */
+.slide-fade-enter-active,
+.slide-fade-leave-active {
+  transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+  transform-origin: top center;
+  max-height: 100px;
+}
+
+.slide-fade-enter-from,
+.slide-fade-leave-to {
+  opacity: 0;
+  transform: translateY(-10px);
+  max-height: 0;
+  margin-bottom: 0;
+  overflow: hidden;
+}
+
+.sub-filter-btn {
+  background: transparent;
+  border: none;
+  padding: 6px 15px;
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  color: #777;
+  transition: all 0.2s ease;
+}
+
+.sub-filter-btn:hover {
+  color: #111;
+  background: rgba(0,0,0,0.05);
+}
+
+.sub-filter-btn.active {
+  background: #111;
+  color: #fff;
+  font-weight: 600;
 }
 
 .filter-btn {
@@ -548,7 +663,7 @@ onMounted(async () => {
 
 .nav-arrow:disabled {
   opacity: 0.2;
-  cursor: not-allowed;
+  pointer-events: none;
 }
 
 .nav-arrow-icon {

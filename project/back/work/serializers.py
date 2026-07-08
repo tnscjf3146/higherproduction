@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Work, Category, BrandClient, Project, Inquiry
+from .models import Work, MainCategory, SubCategory, BrandClient, Project, Inquiry
 
 class BrandClientSerializer(serializers.ModelSerializer):
     class Meta:
@@ -14,23 +14,29 @@ class ProjectSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class WorkSerializer(serializers.ModelSerializer):
-    category_name = serializers.CharField(source='category.name', read_only=True)
+    sub_category_name = serializers.CharField(source='sub_category.name', read_only=True)
     
     class Meta:
         model = Work
         fields = '__all__'
 
-class CategorySerializer(serializers.ModelSerializer):
+class SubCategorySerializer(serializers.ModelSerializer):
     works = serializers.SerializerMethodField()
 
     class Meta:
-        model = Category
-        fields = ['id', 'name', 'subtitle', 'order', 'is_vertical', 'works']
+        model = SubCategory
+        fields = ['id', 'name', 'order', 'is_vertical', 'works']
 
     def get_works(self, obj):
-        # 공개된 작품만 역순 정렬해서 가져오기
         works = obj.works.filter(is_visible=True).order_by('-created_at')
         return WorkSerializer(works, many=True).data
+
+class MainCategorySerializer(serializers.ModelSerializer):
+    sub_categories = SubCategorySerializer(many=True, read_only=True)
+
+    class Meta:
+        model = MainCategory
+        fields = ['id', 'name', 'order', 'sub_categories']
 
 class InquirySerializer(serializers.ModelSerializer):
     class Meta:

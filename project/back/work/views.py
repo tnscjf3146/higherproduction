@@ -2,15 +2,15 @@ from rest_framework import viewsets
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAdminUser, IsAuthenticated
-from .models import Category, Work, BrandClient, Project, Inquiry
-from .serializers import CategorySerializer, WorkSerializer, BrandClientSerializer, ProjectSerializer, InquirySerializer
+from .models import MainCategory, SubCategory, Work, BrandClient, Project, Inquiry
+from .serializers import MainCategorySerializer, SubCategorySerializer, WorkSerializer, BrandClientSerializer, ProjectSerializer, InquirySerializer
 
 class CategoryListView(APIView):
     permission_classes = [AllowAny]
     
     def get(self, request):
-        categories = Category.objects.all().order_by('order')
-        serializer = CategorySerializer(categories, many=True)
+        categories = MainCategory.objects.all().order_by('order')
+        serializer = MainCategorySerializer(categories, many=True)
         return Response(serializer.data)
 
 class StatsAPIView(APIView):
@@ -21,7 +21,7 @@ class StatsAPIView(APIView):
             "projects_count": Project.objects.count(),
             "final_cuts_count": Work.objects.count(),
             "clients_count": BrandClient.objects.count(),
-            "categories_count": Category.objects.count(),
+            "categories_count": MainCategory.objects.count(),
         }
         return Response(data)
 
@@ -111,10 +111,15 @@ class WorkViewSet(viewsets.ModelViewSet):
     queryset = Work.objects.all().order_by('-created_at')
     serializer_class = WorkSerializer
 
-class CategoryViewSet(viewsets.ModelViewSet):
+class MainCategoryViewSet(viewsets.ModelViewSet):
     permission_classes = [AllowAny]
-    queryset = Category.objects.all().order_by('order')
-    serializer_class = CategorySerializer
+    queryset = MainCategory.objects.all().order_by('order')
+    serializer_class = MainCategorySerializer
+
+class SubCategoryViewSet(viewsets.ModelViewSet):
+    permission_classes = [AllowAny]
+    queryset = SubCategory.objects.all().order_by('main_category__order', 'order')
+    serializer_class = SubCategorySerializer
 
 class InquiryViewSet(viewsets.ModelViewSet):
     permission_classes = [AllowAny]

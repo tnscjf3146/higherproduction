@@ -95,17 +95,14 @@
                 <NuxtLink to="/services" class="plan-link">플랜 보기 &rarr;</NuxtLink>
               </div>
               <div class="budget-options">
-                <label class="budget-radio" :class="{ active: form.budget === '플랜 A' }">
-                  <input type="radio" v-model="form.budget" value="플랜 A" /> 플랜 A
+                <label v-for="(plan, index) in plans" :key="plan.id" class="budget-radio" :class="{ active: form.selectedBudgetOptions.includes(plan.id) }">
+                  <input type="checkbox" v-model="form.selectedBudgetOptions" :value="plan.id" /> PLAN {{ String.fromCharCode(65 + index) }}
                 </label>
-                <label class="budget-radio" :class="{ active: form.budget === '플랜 B' }">
-                  <input type="radio" v-model="form.budget" value="플랜 B" /> 플랜 B
+                <label class="budget-radio" :class="{ active: form.selectedBudgetOptions.includes('상담 후 협의') }">
+                  <input type="checkbox" v-model="form.selectedBudgetOptions" value="상담 후 협의" /> 상담 후 협의
                 </label>
-                <label class="budget-radio" :class="{ active: form.budget === '상담 후 협의' }">
-                  <input type="radio" v-model="form.budget" value="상담 후 협의" /> 상담 후 협의
-                </label>
-                <label class="budget-radio" :class="{ active: form.budget === '기타' }">
-                  <input type="radio" v-model="form.budget" value="기타" /> 기타
+                <label class="budget-radio" :class="{ active: form.selectedBudgetOptions.includes('기타') }">
+                  <input type="checkbox" v-model="form.selectedBudgetOptions" value="기타" /> 기타
                 </label>
               </div>
             </div>
@@ -157,8 +154,21 @@ const loadSiteSetting = async () => {
   }
 }
 
+const plans = ref([])
+const loadPlans = async () => {
+  try {
+    const data = await $fetch(useRuntimeConfig().public.apiBaseUrl + '/product/plans/')
+    if (data) {
+      plans.value = data
+    }
+  } catch (e) {
+    console.error('Failed to load plans:', e)
+  }
+}
+
 onMounted(() => {
   loadSiteSetting()
+  loadPlans()
 })
 
 const form = reactive({
@@ -170,7 +180,7 @@ const form = reactive({
   phone3: '',
   email: '',
   category: '',
-  budget: '상담 후 협의',
+  selectedBudgetOptions: ['상담 후 협의'],
   details: ''
 })
 
@@ -181,6 +191,9 @@ const submitForm = async () => {
   isSubmitting.value = true
 
   try {
+    const selectedPlanIds = form.selectedBudgetOptions.filter(opt => typeof opt === 'number')
+    const selectedStrings = form.selectedBudgetOptions.filter(opt => typeof opt === 'string')
+
     const payload = {
       title: form.title,
       name: form.name,
@@ -188,7 +201,8 @@ const submitForm = async () => {
       phone: `${form.phone1}-${form.phone2}-${form.phone3}`,
       email: form.email,
       category: form.category,
-      budget: form.budget,
+      plans: selectedPlanIds,
+      budget: selectedStrings.join(', '),
       details: form.details
     }
 
@@ -207,7 +221,7 @@ const submitForm = async () => {
     // 폼 초기화
     Object.assign(form, {
       title: '', name: '', company: '', phone1: '', phone2: '', phone3: '',
-      email: '', category: '', budget: '상담 후 협의', details: ''
+      email: '', category: '', selectedBudgetOptions: ['상담 후 협의'], details: ''
     })
   } catch (error) {
     console.error(error)
@@ -264,6 +278,9 @@ const submitForm = async () => {
   .contact-content {
     grid-template-columns: 1fr;
     gap: 40px;
+  }
+  .contact-info {
+    display: none;
   }
 }
 
