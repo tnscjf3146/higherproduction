@@ -47,10 +47,12 @@ const formWork = ref({
   youtube_link: '', 
   instagram_embed: '',
   content: '',
-  status: 'IN_PROGRESS', 
+  status: 'COMPLETED', 
   is_visible: true,
   thumbnail_url: '' // 유튜브 썸네일 미리보기용
 })
+
+const selectedPlatform = ref('YOUTUBE') // 'YOUTUBE' 또는 'INSTAGRAM'
 
 // 카테고리 인라인 수정 상태
 const editingMainCategoryId = ref(null)
@@ -318,6 +320,9 @@ const startEditingMainCategory = (cat) => {
   editingMainCategoryId.value = cat.id
   editingMainCategoryData.value = { id: cat.id, name: cat.name, order: cat.order }
 }
+const cancelEditingMainCategory = () => {
+  editingMainCategoryId.value = null
+}
 const saveMainCategory = async () => {
   try {
     await $fetch(`${useRuntimeConfig().public.apiBaseUrl}/work/admin/main-categories/${editingMainCategoryData.value.id}/`, {
@@ -364,6 +369,9 @@ const startEditingSubCategory = (cat) => {
     is_vertical: cat.is_vertical,
     is_instagram: cat.is_instagram
   }
+}
+const cancelEditingSubCategory = () => {
+  editingSubCategoryId.value = null
 }
 const saveSubCategory = async () => {
   try {
@@ -513,7 +521,7 @@ const addWork = async () => {
       }
     })
     // 초기화
-    formWork.value = { title: '', sub_category: '', youtube_link: '', instagram_embed: '', content: '', status: 'IN_PROGRESS', is_visible: true, thumbnail_url: '' }
+    formWork.value = { title: '', sub_category: '', youtube_link: '', instagram_embed: '', content: '', status: 'COMPLETED', is_visible: true, thumbnail_url: '' }
     alert('최종 영상이 성공적으로 추가되었습니다.')
     loadWorks()
   } catch (e) {
@@ -952,79 +960,144 @@ const saveSiteSetting = async () => {
         <div v-if="activeTab === 'category'">
           <h2 class="panel-title">카테고리 관리</h2>
           
-          <div class="section">
-            <h3>새 카테고리 추가</h3>
-            <div class="form-row" style="align-items: flex-end;">
-              <div class="form-group flex-2">
-                <label>카테고리명 *</label>
-                <input v-model="formCategory.name" type="text" placeholder="예: 브랜드 필름" />
-              </div>
-              <div class="form-group flex-2">
-                <label>소제목 (선택)</label>
-                <input v-model="formCategory.subtitle" type="text" placeholder="예: 광고 · TVCF" />
-              </div>
-              <div class="form-group flex-1">
-                <label>노출 순서</label>
-                <input v-model="formCategory.order" type="number" placeholder="0" style="width:100%; padding:12px 15px; border:1px solid #ddd; border-radius:6px;" />
-              </div>
-              <div class="form-group flex-1" style="display:flex; align-items:center; gap:8px; padding-bottom: 12px;">
-                <input type="checkbox" id="isVertical" v-model="formCategory.is_vertical" />
-                <label for="isVertical" style="margin:0; cursor:pointer;">세로형(쇼츠) 여부</label>
-              </div>
-              <button class="btn-submit" @click="addCategory" style="margin-bottom: 2px;">추가하기</button>
-            </div>
-          </div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 40px;">
+            <!-- 대분류 관리 -->
+            <div>
+              <div class="section">
+                <h3>새 대분류 추가</h3>
+                <div class="form-row" style="align-items: flex-end; margin-bottom: 20px;">
+                  <div class="form-group flex-2">
+                    <label>대분류명 *</label>
+                    <input v-model="formMainCategory.name" type="text" placeholder="예: 영상, 브랜드" />
+                  </div>
+                  <div class="form-group flex-1">
+                    <label>노출 순서</label>
+                    <input v-model="formMainCategory.order" type="number" placeholder="0" />
+                  </div>
+                  <button class="btn-submit" @click="addMainCategory">추가</button>
+                </div>
 
-          <div class="section">
-            <h3>등록된 카테고리 목록</h3>
-            <table class="data-table">
-              <thead>
-                <tr>
-                  <th>순서(Order)</th>
-                  <th>카테고리명</th>
-                  <th>소제목</th>
-                  <th>형태</th>
-                  <th>관리</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="cat in categories" :key="cat.id">
-                  <template v-if="editingCategoryId === cat.id">
-                    <td>
-                      <input type="number" v-model="editingCategoryData.order" style="width: 60px; padding: 6px; text-align: center; border: 1px solid #ddd; border-radius: 4px;" />
-                    </td>
-                    <td>
-                      <input type="text" v-model="editingCategoryData.name" style="width: 100%; max-width: 150px; padding: 6px; border: 1px solid #ddd; border-radius: 4px;" />
-                    </td>
-                    <td>
-                      <input type="text" v-model="editingCategoryData.subtitle" style="width: 100%; max-width: 150px; padding: 6px; border: 1px solid #ddd; border-radius: 4px;" />
-                    </td>
-                    <td>
-                      <div style="display:flex; justify-content:center; align-items:center; height:100%;">
-                        <input type="checkbox" v-model="editingCategoryData.is_vertical" style="cursor:pointer; width:16px; height:16px;" />
-                      </div>
-                    </td>
-                    <td>
-                      <button class="btn-submit" @click="saveCategory" style="padding: 6px 12px; font-size: 12px; margin-right: 5px; height: auto;">저장</button>
-                      <button class="btn-delete" @click="cancelEditingCategory" style="padding: 6px 12px; font-size: 12px; height: auto; background-color: #888;">취소</button>
-                    </td>
-                  </template>
-                  <template v-else>
-                    <td>{{ cat.order }}</td>
-                    <td>{{ cat.name }}</td>
-                    <td>{{ cat.subtitle || '-' }}</td>
-                    <td>{{ cat.is_vertical ? '세로형(쇼츠)' : '가로형' }}</td>
-                    <td>
-                      <button class="btn-submit" @click="startEditingCategory(cat)" style="padding: 6px 12px; font-size: 12px; margin-right: 5px; height: auto; background-color: #f39c12;">수정</button>
-                      <button class="btn-delete" @click="deleteCategory(cat.id)" style="padding: 6px 12px; font-size: 12px; height: auto;">삭제</button>
-                    </td>
-                  </template>
-                </tr>
-                <tr v-if="categories.length === 0">
-                  <td colspan="5" class="text-center">등록된 데이터가 없습니다.</td>
-                </tr>
-              </tbody>
-            </table>
+                <table class="data-table">
+                  <thead>
+                    <tr>
+                      <th style="width: 50px;">순서</th>
+                      <th>대분류명</th>
+                      <th>관리</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr v-for="cat in mainCategories" :key="'mc-'+cat.id">
+                      <template v-if="editingMainCategoryId === cat.id">
+                        <td><input type="number" v-model="editingMainCategoryData.order" style="width:100%; padding:4px;" /></td>
+                        <td><input type="text" v-model="editingMainCategoryData.name" style="width:100%; padding:4px;" /></td>
+                        <td>
+                          <button class="btn-submit" @click="saveMainCategory" style="padding: 4px 8px; font-size:11px;">저장</button>
+                          <button class="btn-delete" @click="cancelEditingMainCategory" style="padding: 4px 8px; font-size:11px; background:#888;">취소</button>
+                        </td>
+                      </template>
+                      <template v-else>
+                        <td>{{ cat.order }}</td>
+                        <td>{{ cat.name }}</td>
+                        <td>
+                          <button class="btn-submit" @click="startEditingMainCategory(cat)" style="padding: 4px 8px; font-size:11px; background:#f39c12; margin-right:4px;">수정</button>
+                          <button class="btn-delete" @click="deleteMainCategory(cat.id)" style="padding: 4px 8px; font-size:11px;">삭제</button>
+                        </td>
+                      </template>
+                    </tr>
+                    <tr v-if="mainCategories.length === 0">
+                      <td colspan="3" class="text-center">등록된 대분류가 없습니다.</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- 중분류 관리 -->
+            <div>
+              <div class="section">
+                <h3>새 중분류(카테고리) 추가</h3>
+                
+                <div class="form-row" style="margin-bottom: 15px;">
+                  <div class="form-group flex-1">
+                    <label>소속 대분류 선택 *</label>
+                    <select v-model="formSubCategory.main_category">
+                      <option value="">대분류를 먼저 선택하세요</option>
+                      <option v-for="mc in mainCategories" :key="'smc-'+mc.id" :value="mc.id">{{ mc.name }}</option>
+                    </select>
+                  </div>
+                  <div class="form-group flex-1">
+                    <label>중분류명(카테고리명) *</label>
+                    <input v-model="formSubCategory.name" type="text" placeholder="예: 브랜드 필름" />
+                  </div>
+                  <div class="form-group flex-1">
+                    <label>노출 순서</label>
+                    <input v-model="formSubCategory.order" type="number" placeholder="0" />
+                  </div>
+                </div>
+
+                <div class="form-row" style="margin-bottom: 15px; background: #fafafa; padding: 15px; border-radius: 6px; border: 1px solid #eee;">
+                  <div class="form-group flex-1" style="display:flex; align-items:center; gap:8px;">
+                    <input type="checkbox" id="isSubVertical" v-model="formSubCategory.is_vertical" style="width: 16px; height: 16px;" />
+                    <label for="isSubVertical" style="margin:0; cursor:pointer; font-weight: bold; color: #111;">세로형(쇼츠) 여부</label>
+                  </div>
+                  <div class="form-group flex-1" style="display:flex; align-items:center; gap:8px;">
+                    <input type="checkbox" id="isSubInstagram" v-model="formSubCategory.is_instagram" style="width: 16px; height: 16px;" />
+                    <label for="isSubInstagram" style="margin:0; cursor:pointer; font-weight: bold; color: #111;">인스타그램 여부</label>
+                  </div>
+                </div>
+                
+                <div style="text-align: right; margin-bottom: 20px;">
+                  <button class="btn-submit" @click="addSubCategory">중분류 추가하기</button>
+                </div>
+
+                <table class="data-table">
+                  <thead>
+                    <tr>
+                      <th style="width: 50px;">순서</th>
+                      <th>대분류 / 중분류명</th>
+                      <th>설정</th>
+                      <th>관리</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr v-for="cat in subCategories" :key="'sc-'+cat.id">
+                      <template v-if="editingSubCategoryId === cat.id">
+                        <td><input type="number" v-model="editingSubCategoryData.order" style="width:100%; padding:4px;" /></td>
+                        <td>
+                          <select v-model="editingSubCategoryData.main_category" style="width:100%; padding:4px; margin-bottom: 4px;">
+                            <option v-for="mc in mainCategories" :key="'esmc-'+mc.id" :value="mc.id">{{ mc.name }}</option>
+                          </select>
+                          <input type="text" v-model="editingSubCategoryData.name" style="width:100%; padding:4px;" />
+                        </td>
+                        <td>
+                          <label style="display:block; font-size:11px; margin-bottom:4px; cursor:pointer;"><input type="checkbox" v-model="editingSubCategoryData.is_vertical"> 쇼츠</label>
+                          <label style="display:block; font-size:11px; cursor:pointer;"><input type="checkbox" v-model="editingSubCategoryData.is_instagram"> 인스타</label>
+                        </td>
+                        <td>
+                          <button class="btn-submit" @click="saveSubCategory" style="padding: 4px 8px; font-size:11px;">저장</button>
+                          <button class="btn-delete" @click="cancelEditingSubCategory" style="padding: 4px 8px; font-size:11px; background:#888;">취소</button>
+                        </td>
+                      </template>
+                      <template v-else>
+                        <td>{{ cat.order }}</td>
+                        <td><span style="color:#888; font-size:12px;">[{{ mainCategories.find(mc => mc.id === cat.main_category)?.name || '' }}]</span><br><b>{{ cat.name }}</b></td>
+                        <td style="font-size:12px;">
+                          <span v-if="cat.is_vertical" style="color:#1a3ae0; font-weight:bold;">[쇼츠]</span>
+                          <span v-if="cat.is_instagram" style="color:#e74c3c; font-weight:bold;">[인스타]</span>
+                        </td>
+                        <td>
+                          <button class="btn-submit" @click="startEditingSubCategory(cat)" style="padding: 4px 8px; font-size:11px; background:#f39c12; margin-right:4px;">수정</button>
+                          <button class="btn-delete" @click="deleteSubCategory(cat.id)" style="padding: 4px 8px; font-size:11px;">삭제</button>
+                        </td>
+                      </template>
+                    </tr>
+                    <tr v-if="subCategories.length === 0">
+                      <td colspan="4" class="text-center">등록된 중분류가 없습니다.</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -1035,8 +1108,19 @@ const saveSiteSetting = async () => {
           <div class="section">
             <h3>새 영상 포트폴리오 추가</h3>
             
+            <!-- 플랫폼 선택 -->
+            <div class="form-row" style="margin-bottom: 15px;">
+              <div class="form-group flex-1">
+                <label>플랫폼 선택</label>
+                <div style="display: flex; gap: 20px; align-items: center; margin-top: 10px;">
+                  <label style="display:flex; align-items:center; gap:8px; cursor:pointer; margin:0;"><input type="radio" v-model="selectedPlatform" value="YOUTUBE" /> 유튜브 (YouTube)</label>
+                  <label style="display:flex; align-items:center; gap:8px; cursor:pointer; margin:0;"><input type="radio" v-model="selectedPlatform" value="INSTAGRAM" /> 인스타그램 (Instagram)</label>
+                </div>
+              </div>
+            </div>
+
             <!-- 유튜브 URL 또는 검색 입력부 -->
-            <div class="form-row" style="margin-bottom: 15px; align-items: flex-end;">
+            <div v-if="selectedPlatform === 'YOUTUBE'" class="form-row" style="margin-bottom: 15px; align-items: flex-end;">
               <div class="form-group flex-1">
                 <label>유튜브 영상 링크</label>
                 <div style="display:flex; gap:10px;">
@@ -1063,7 +1147,7 @@ const saveSiteSetting = async () => {
             </div>
 
             <!-- 인스타그램 퍼가기 코드 입력부 추가 -->
-            <div class="form-row" style="margin-bottom: 15px;">
+            <div v-if="selectedPlatform === 'INSTAGRAM'" class="form-row" style="margin-bottom: 15px;">
               <div class="form-group flex-1">
                 <label>인스타그램 퍼가기 코드 (HTML)</label>
                 <textarea v-model="formWork.instagram_embed" rows="3" placeholder="인스타그램 게시물에서 '퍼가기' 버튼을 눌러 복사한 HTML 코드를 붙여넣으세요. 유튜브 링크와 함께 입력된 경우 인스타그램 카드가 우선 표시됩니다."></textarea>

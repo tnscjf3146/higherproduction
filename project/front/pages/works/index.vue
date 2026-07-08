@@ -98,7 +98,7 @@
 
           <!-- 뷰포트 (실제 그리드 컨테이너) -->
           <div class="carousel-viewport">
-            <transition :name="slideDirection" mode="out-in">
+            <transition :name="slideDirection" mode="out-in" @after-enter="processInstagram">
                   <div 
                     :key="categoryPages[category.id] || 1"
                     class="works-grid" 
@@ -211,9 +211,15 @@ watch([selectedCategory, selectedSubCategory], () => {
     categoryPages.value[cat.id] = 1
   })
   setTimeout(() => {
-    if (window.instgrm) window.instgrm.Embeds.process()
+    processInstagram()
   }, 300)
 })
+
+const processInstagram = () => {
+  if (window.instgrm) {
+    window.instgrm.Embeds.process()
+  }
+}
 
 const totalCategories = computed(() => {
   let count = 0
@@ -288,10 +294,13 @@ const filteredCategories = computed(() => {
 })
 
 // --- 페이지네이션 로직 ---
-const getPageSize = (isVertical) => {
+const getPageSize = (category) => {
   const isSmallScreen = windowWidth.value <= 768
+  const isVertical = category.is_vertical
+  const isInstagram = category.is_instagram
   
   if (selectedCategory.value === 'ALL') {
+    if (isInstagram) return 3 // 인스타그램은 ALL탭에서 3개(1줄)
     if (isSmallScreen) {
       return isVertical ? 6 : 4 // 모바일: 가로형 4개(2줄), 세로형 6개(2줄)
     }
@@ -299,12 +308,13 @@ const getPageSize = (isVertical) => {
   }
   
   // 개별 카테고리 선택 시
+  if (isInstagram) return 9 // 인스타그램은 상세에서 9개(3줄)
   return isSmallScreen ? (isVertical ? 12 : 10) : 15 
 }
 
 const getPaginatedWorks = (category) => {
   if (!category.works) return []
-  const pageSize = getPageSize(category.is_vertical)
+  const pageSize = getPageSize(category)
   const currentPage = categoryPages.value[category.id] || 1
   const start = (currentPage - 1) * pageSize
   return category.works.slice(start, start + pageSize)
@@ -312,7 +322,7 @@ const getPaginatedWorks = (category) => {
 
 const getTotalPages = (category) => {
   if (!category.works) return 1
-  const pageSize = getPageSize(category.is_vertical)
+  const pageSize = getPageSize(category)
   return Math.ceil(category.works.length / pageSize)
 }
 
@@ -324,9 +334,7 @@ const changePage = (categoryId, newPage) => {
     slideDirection.value = 'slide-right' // 이전 페이지: 오른쪽으로 밀려남
   }
   categoryPages.value[categoryId] = newPage
-  setTimeout(() => {
-    if (window.instgrm) window.instgrm.Embeds.process()
-  }, 300)
+  // 뷰 트랜지션 @after-enter 훅에서 processInstagram() 이 호출됩니다.
 }
 // ----------------------
 

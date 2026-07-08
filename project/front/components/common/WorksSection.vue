@@ -82,13 +82,14 @@
 
               <!-- 뷰포트 -->
               <div class="carousel-viewport">
-                <transition :name="slideDirection" mode="out-in">
+                <transition :name="slideDirection" mode="out-in" @after-enter="processInstagram">
                   <div 
                     :key="categoryPages[category.id] || 1"
                     class="works-grid" 
                     :class="{ 
-                      'vertical-grid': category.is_vertical && !category.is_instagram,
-                      'instagram-grid': category.is_instagram
+                      'vertical-grid': category.is_vertical && !category.is_instagram && selectedCategory !== 'ALL',
+                      'instagram-grid': category.is_instagram,
+                      'vertical-ratio': category.is_vertical && !category.is_instagram
                     }"
                   >
                     <div 
@@ -96,7 +97,14 @@
                       :key="work.id" 
                       class="work-card"
                     >
-                      <div class="thumbnail-wrapper" @click="!work.instagram_embed && openVideo(work.id, work.youtube_link)">
+                      <div 
+                        class="thumbnail-wrapper" 
+                        :class="{ 
+                          'is-vertical-thumb': work.is_vertical && !work.instagram_embed,
+                          'is-instagram-thumb': !!work.instagram_embed
+                        }"
+                        @click="!work.instagram_embed && openVideo(work.id, work.youtube_link)"
+                      >
                         <template v-if="work.instagram_embed">
                           <div class="instagram-embed-container" v-html="work.instagram_embed"></div>
                         </template>
@@ -190,12 +198,19 @@ const filteredCategories = computed(() => {
       let mergedWorks = []
       if (main.sub_categories) {
         main.sub_categories.forEach(sub => {
-          if (sub.works) mergedWorks.push(...sub.works)
+          if (sub.works) {
+            sub.works.forEach(work => {
+              work.is_vertical = sub.is_vertical
+              work.is_instagram = sub.is_instagram
+            })
+            mergedWorks.push(...sub.works)
+          }
         })
       }
       mergedWorks.sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
-      const isVertical = main.sub_categories && main.sub_categories.some(sub => sub.is_vertical)
-      const isInstagram = main.sub_categories && main.sub_categories.some(sub => sub.is_instagram)
+      
+      const isVertical = main.sub_categories && main.sub_categories.every(sub => sub.is_vertical) // 전체가 세로형일 때만 true
+      const isInstagram = main.sub_categories && main.sub_categories.every(sub => sub.is_instagram) // 전체가 인스타일 때만 true
       
       if (mergedWorks.length > 0 || categories.value.length === 1) {
         result.push({
@@ -214,13 +229,23 @@ const filteredCategories = computed(() => {
         // 개별 중분류 섹션들만 표시
         main.sub_categories.forEach(sub => {
           if (sub.works && sub.works.length > 0) {
+            sub.works.forEach(work => {
+              work.is_vertical = sub.is_vertical
+              work.is_instagram = sub.is_instagram
+            })
             result.push(sub)
           }
         })
       } else {
         // 특정 중분류 선택 시 해당 중분류만 표시
         const sub = main.sub_categories.find(s => s.id === selectedSubCategory.value)
-        if (sub && sub.works && sub.works.length > 0) result.push(sub)
+        if (sub && sub.works && sub.works.length > 0) {
+          sub.works.forEach(work => {
+            work.is_vertical = sub.is_vertical
+            work.is_instagram = sub.is_instagram
+          })
+          result.push(sub)
+        }
       }
     }
   }
@@ -235,20 +260,26 @@ watch([selectedCategory, selectedSubCategory], () => {
     categoryPages.value[cat.id] = 1
   })
   setTimeout(() => {
-    if (window.instgrm) window.instgrm.Embeds.process()
+    processInstagram()
   }, 300)
 })
 
-const getPageSize = (isVertical) => {
-  if (selectedCategory.value === 'ALL') {
-    return isVertical ? 5 : 3
+const processInstagram = () => {
+  if (window.instgrm) {
+    window.instgrm.Embeds.process()
   }
-  return isVertical ? 10 : 6
+}
+
+const getPageSize = (category) => {
+  if (selectedCategory.value === 'ALL') {
+    return 3
+  }
+  return category.is_vertical ? 10 : 6
 }
 
 const getPaginatedWorks = (category) => {
   if (!category.works) return []
-  const pageSize = getPageSize(category.is_vertical)
+  const pageSize = getPageSize(category)
   const currentPage = categoryPages.value[category.id] || 1
   const start = (currentPage - 1) * pageSize
   return category.works.slice(start, start + pageSize)
@@ -256,7 +287,7 @@ const getPaginatedWorks = (category) => {
 
 const getTotalPages = (category) => {
   if (!category.works) return 1
-  const pageSize = getPageSize(category.is_vertical)
+  const pageSize = getPageSize(category)
   return Math.ceil(category.works.length / pageSize)
 }
 
@@ -268,9 +299,7 @@ const changePage = (categoryId, newPage) => {
     slideDirection.value = 'slide-right'
   }
   categoryPages.value[categoryId] = newPage
-  setTimeout(() => {
-    if (window.instgrm) window.instgrm.Embeds.process()
-  }, 300)
+  // 뷰 트랜지션 @after-enter 훅에서 processInstagram() 이 호출됩니다.
 }
 
 const getYoutubeVideoId = (url) => {
@@ -521,6 +550,19 @@ onMounted(async () => {
 /* 세로형(쇼츠) 그리드 (숏 플랫폼 - 5열) */
 .vertical-grid {
   grid-template-columns: repeat(5, 1fr);
+}
+
+/* 세로형 비율 유지를 위한 클래스 (작품 개별 적용) */
+.is-vertical-thumb {
+  padding-top: 177.77%; /* 9:16 비율 (쇼츠) */
+}
+
+/* 인스타그램 썸네일 래퍼용 클래스 (작품 개별 적용) */
+.is-instagram-thumb {
+  padding-top: 0 !important;
+  background-color: transparent !important;
+  min-height: 400px;
+  height: auto !important;
 }
 
 /* 인스타그램 그리드 (3열) */
