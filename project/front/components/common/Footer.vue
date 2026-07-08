@@ -315,5 +315,12 @@ a.info-value:hover {
     gap: 20px;
     text-align: center;
   }
+
+  .header-title {
+    font-size: 16px;
+  }
+  .header-bracket {
+    font-size: 10px;
+  }
 }
 </style>

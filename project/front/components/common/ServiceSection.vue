@@ -19,8 +19,8 @@
           처음부터 <span class="highlight-blue">제대로</span>, 꾸준히 <span class="highlight-blue">높게</span>.
         </h3>
         <p class="sub-heading">
-          <strong>{{ plans.length }} 가지 운영 플랜</strong>으로 채널의 단계에 맞춰 시작합니다. 영상 마케팅이 처음인 기업부터 채널 성장과 브랜딩까지<br>
-          플랜별로 같은 원칙, 다른 강도의 작업이 부과됩니다. 모든 플랜은 4주(한달) 기준이며, VAT별도입니다.
+          <strong>{{ plans.length }} 가지 운영 플랜</strong>으로 채널의 단계에 맞춰 시작합니다.<br><br>영상 마케팅이 처음인 기업부터<br>채널 성장과 브랜딩까지<br><br>
+          플랜별로 같은 원칙, 다른 강도의 작업이 부과됩니다.<br><br>모든 플랜은 <br>4주(한달) 기준이며, VAT별도입니다.
         </p>
       </div>
 
@@ -497,7 +497,11 @@ onUnmounted(() => {
   }
   
   .main-heading {
-    font-size: 36px;
+    font-size: 30px;
+  }
+
+  .sub-heading{
+    font-size: 14px;
   }
   
   .plan-card {
@@ -507,6 +511,13 @@ onUnmounted(() => {
   
   .row-label {
     width: 90px;
+  }
+
+  .header-title {
+    font-size: 16px;
+  }
+  .header-bracket {
+    font-size: 10px;
   }
 }
 </style>

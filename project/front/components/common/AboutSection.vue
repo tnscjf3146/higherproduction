@@ -67,7 +67,10 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, watchEffect } from 'vue'
+import { useSiteStore } from '~/stores/site'
+
+const siteStore = useSiteStore()
 
 const props = defineProps({
   sectionIndex: { type: String, default: '02' },
@@ -192,7 +195,7 @@ onMounted(() => {
 .logo-img {
   margin: auto;
   /* 화면 너비에 따라 동적으로 변하게 설정 (최소 150px, 화면의 25%, 최대 450px) */
-  width: clamp(200px, 25vw, 350px);
+  width: clamp(300px, 30vw, 400px);
   height: auto;
   /* 파란색 로고를 완전히 흰색으로 만들기 위한 필터 */
   filter: brightness(0) invert(1); 
@@ -304,6 +307,13 @@ onMounted(() => {
   
   .feature-title {
     font-size: 20px;
+  }
+
+  .header-title {
+    font-size: 16px;
+  }
+  .header-bracket {
+    font-size: 10px;
   }
 }
 </style>

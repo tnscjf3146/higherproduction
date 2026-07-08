@@ -94,10 +94,28 @@ cd higherproduction/project
 
 ## 5. 프로젝트 실행
 
-`docker-compose.yml` 파일이 있는 `project` 디렉토리에서 아래 명령어를 실행하여 컨테이너들을 백그라운드에서 빌드하고 실행합니다.
+프로젝트 실행은 상황에 따라 명령어가 다릅니다. `docker-compose.yml` 파일이 있는 `project` 디렉토리에서 실행해 주세요.
+
+### 1) 최초 실행 시 (데이터베이스 생성 포함)
+처음 서버를 켤 때는 컨테이너를 실행한 뒤, 백엔드 데이터베이스 테이블을 생성해야 합니다.
 
 ```bash
-sudo docker-compose up --build -d
+# 1. 이미지 빌드 및 백그라운드에서 컨테이너 실행
+sudo docker-compose up -d --build
+
+# 2. 데이터베이스 테이블 생성 (최초 1회 필수)
+sudo docker-compose exec back python manage.py migrate
+
+# 3. 관리자 계정 생성 (선택 사항)
+sudo docker-compose exec back python manage.py createsuperuser --username admin
+```
+
+### 2) 코드 수정 후 업데이트 시
+이후 프론트엔드나 백엔드의 코드를 수정하여 서버에 반영할 때는 데이터베이스 명령 없이 이미지만 다시 빌드하여 재시작합니다.
+
+```bash
+# 수정된 코드를 바탕으로 이미지를 다시 빌드하고 띄우기
+sudo docker-compose up -d --build
 ```
 
 명령어가 완료되면 아래 주소로 접속하여 정상적으로 켜졌는지 확인합니다.
@@ -148,5 +166,4 @@ rm -rf 폴더이름
 *(예: `rm -rf higherproduction`)*
 > **주의**: `-rf` 옵션을 사용하면 묻지 않고 폴더와 그 안의 모든 내용이 즉시 삭제되므로 절대 경로를 헷갈리지 않도록 주의하세요!
 
-
-sudo docker-compose exec back python manage.py createsuperuser --username admin
+
