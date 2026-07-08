@@ -86,34 +86,43 @@
                   <div 
                     :key="categoryPages[category.id] || 1"
                     class="works-grid" 
-                    :class="{ 'vertical-grid': category.is_vertical }"
+                    :class="{ 
+                      'vertical-grid': category.is_vertical && !category.is_instagram,
+                      'instagram-grid': category.is_instagram
+                    }"
                   >
                     <div 
                       v-for="work in getPaginatedWorks(category)" 
                       :key="work.id" 
                       class="work-card"
                     >
-                      <div class="thumbnail-wrapper" @click="openVideo(work.id, work.youtube_link)">
-                        <iframe v-if="playingWorkId === work.id"
-                          :src="`https://www.youtube.com/embed/${getYoutubeVideoId(work.youtube_link)}?autoplay=1`"
-                          frameborder="0"
-                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                          allowfullscreen
-                          class="work-iframe"
-                        ></iframe>
+                      <div class="thumbnail-wrapper" @click="!work.instagram_embed && openVideo(work.id, work.youtube_link)">
+                        <template v-if="work.instagram_embed">
+                          <div class="instagram-embed-container" v-html="work.instagram_embed"></div>
+                        </template>
                         <template v-else>
-                          <img 
-                            :src="getYoutubeThumbnail(work.youtube_link)" 
-                            :alt="work.title" 
-                            class="work-thumbnail"
-                          />
-                          <div class="play-overlay">
-                            <svg class="play-icon" viewBox="0 0 24 24" width="48" height="48">
-                              <path fill="currentColor" d="M8 5v14l11-7z"/>
-                            </svg>
-                          </div>
+                          <iframe v-if="playingWorkId === work.id"
+                            :src="`https://www.youtube.com/embed/${getYoutubeVideoId(work.youtube_link)}?autoplay=1`"
+                            frameborder="0"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                            allowfullscreen
+                            class="work-iframe"
+                          ></iframe>
+                          <template v-else>
+                            <img 
+                              :src="getYoutubeThumbnail(work.youtube_link)" 
+                              :alt="work.title" 
+                              class="work-thumbnail"
+                            />
+                            <div class="play-overlay">
+                              <svg class="play-icon" viewBox="0 0 24 24" width="48" height="48">
+                                <path fill="currentColor" d="M8 5v14l11-7z"/>
+                              </svg>
+                            </div>
+                          </template>
                         </template>
                       </div>
+
                       <div class="work-info">
                         <h3 class="work-title">{{ work.title }}</h3>
                       </div>
@@ -186,12 +195,14 @@ const filteredCategories = computed(() => {
       }
       mergedWorks.sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
       const isVertical = main.sub_categories && main.sub_categories.some(sub => sub.is_vertical)
+      const isInstagram = main.sub_categories && main.sub_categories.some(sub => sub.is_instagram)
       
       if (mergedWorks.length > 0 || categories.value.length === 1) {
         result.push({
           id: `main-${main.id}`,
           name: main.name,
           is_vertical: isVertical,
+          is_instagram: isInstagram,
           works: mergedWorks
         })
       }
@@ -223,6 +234,9 @@ watch([selectedCategory, selectedSubCategory], () => {
   filteredCategories.value.forEach(cat => {
     categoryPages.value[cat.id] = 1
   })
+  setTimeout(() => {
+    if (window.instgrm) window.instgrm.Embeds.process()
+  }, 300)
 })
 
 const getPageSize = (isVertical) => {
@@ -254,6 +268,9 @@ const changePage = (categoryId, newPage) => {
     slideDirection.value = 'slide-right'
   }
   categoryPages.value[categoryId] = newPage
+  setTimeout(() => {
+    if (window.instgrm) window.instgrm.Embeds.process()
+  }, 300)
 }
 
 const getYoutubeVideoId = (url) => {
@@ -287,12 +304,23 @@ const openVideo = (workId, url) => {
 }
 
 onMounted(async () => {
+  if (!document.getElementById('instagram-embed-script')) {
+    const script = document.createElement('script')
+    script.id = 'instagram-embed-script'
+    script.src = '//www.instagram.com/embed.js'
+    script.async = true
+    document.head.appendChild(script)
+  }
+
   try {
     const data = await $fetch(useRuntimeConfig().public.apiBaseUrl + '/work/categories/')
     categories.value = data
     filteredCategories.value.forEach(cat => {
       categoryPages.value[cat.id] = 1
     })
+    setTimeout(() => {
+      if (window.instgrm) window.instgrm.Embeds.process()
+    }, 500)
   } catch (error) {
     console.error('Failed to load works:', error)
   } finally {
@@ -493,6 +521,23 @@ onMounted(async () => {
 /* 세로형(쇼츠) 그리드 (숏 플랫폼 - 5열) */
 .vertical-grid {
   grid-template-columns: repeat(5, 1fr);
+}
+
+/* 인스타그램 그리드 (3열) */
+.instagram-grid {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.instagram-grid .thumbnail-wrapper {
+  padding-top: 0;
+  background-color: transparent;
+  min-height: 400px;
+}
+
+.instagram-embed-container {
+  width: 100%;
+  display: flex;
+  justify-content: center;
 }
 
 @media (max-width: 768px) {

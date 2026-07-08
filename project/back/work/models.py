@@ -16,6 +16,7 @@ class SubCategory(models.Model):
     name = models.CharField(max_length=100, verbose_name='중분류명(채널명)')
     order = models.IntegerField(default=0, verbose_name='노출 순서(낮을수록 먼저 보임)')
     is_vertical = models.BooleanField(default=False, verbose_name='세로형(쇼츠) 여부')
+    is_instagram = models.BooleanField(default=False, verbose_name='인스타그램 여부')
 
     class Meta:
         ordering = ['main_category__order', 'order']
@@ -33,6 +34,7 @@ class Work(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name='works', verbose_name='관련 고객')
     title = models.CharField(max_length=255, verbose_name='작품명')
     youtube_link = models.URLField(verbose_name='영상 링크', blank=True, null=True)
+    instagram_embed = models.TextField(verbose_name='인스타그램 퍼가기 코드', blank=True, null=True)
     content = models.TextField(verbose_name='게시글 내용', blank=True, null=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='IN_PROGRESS', verbose_name='진행 상태')
     is_visible = models.BooleanField(default=True, verbose_name='공개 여부')

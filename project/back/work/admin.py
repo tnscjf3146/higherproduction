@@ -7,7 +7,7 @@ class MainCategoryAdmin(admin.ModelAdmin):
 
 @admin.register(SubCategory)
 class SubCategoryAdmin(admin.ModelAdmin):
-    list_display = ['name', 'main_category', 'is_vertical', 'order']
+    list_display = ['name', 'main_category', 'is_vertical', 'is_instagram', 'order']
 
 @admin.register(Work)
 class WorkAdmin(admin.ModelAdmin):

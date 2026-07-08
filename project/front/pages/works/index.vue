@@ -99,35 +99,43 @@
           <!-- 뷰포트 (실제 그리드 컨테이너) -->
           <div class="carousel-viewport">
             <transition :name="slideDirection" mode="out-in">
-              <div 
-                   :key="categoryPages[category.id] || 1"
-                   class="works-grid" 
-                   :class="{ 'vertical-grid': category.is_vertical }">
+                  <div 
+                    :key="categoryPages[category.id] || 1"
+                    class="works-grid" 
+                    :class="{ 
+                      'vertical-grid': category.is_vertical && !category.is_instagram,
+                      'instagram-grid': category.is_instagram
+                    }">
                 
                 <div 
                   v-for="work in getPaginatedWorks(category)" 
                   :key="work.id" 
                   class="work-card"
                 >
-                  <div class="thumbnail-wrapper" @click="openVideo(work.id, work.youtube_link)">
-                    <iframe v-if="playingWorkId === work.id"
-                      :src="`https://www.youtube.com/embed/${getYoutubeVideoId(work.youtube_link)}?autoplay=1`"
-                      frameborder="0"
-                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                      allowfullscreen
-                      class="work-iframe"
-                    ></iframe>
+                  <div class="thumbnail-wrapper" @click="!work.instagram_embed && openVideo(work.id, work.youtube_link)">
+                    <template v-if="work.instagram_embed">
+                      <div class="instagram-embed-container" v-html="work.instagram_embed"></div>
+                    </template>
                     <template v-else>
-                      <img 
-                        :src="getYoutubeThumbnail(work.youtube_link)" 
-                        :alt="work.title" 
-                        class="work-thumbnail"
-                      />
-                      <div class="play-overlay">
-                        <svg class="play-icon" viewBox="0 0 24 24" width="48" height="48">
-                          <path fill="currentColor" d="M8 5v14l11-7z"/>
-                        </svg>
-                      </div>
+                      <iframe v-if="playingWorkId === work.id"
+                        :src="`https://www.youtube.com/embed/${getYoutubeVideoId(work.youtube_link)}?autoplay=1`"
+                        frameborder="0"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allowfullscreen
+                        class="work-iframe"
+                      ></iframe>
+                      <template v-else>
+                        <img 
+                          :src="getYoutubeThumbnail(work.youtube_link)" 
+                          :alt="work.title" 
+                          class="work-thumbnail"
+                        />
+                        <div class="play-overlay">
+                          <svg class="play-icon" viewBox="0 0 24 24" width="48" height="48">
+                            <path fill="currentColor" d="M8 5v14l11-7z"/>
+                          </svg>
+                        </div>
+                      </template>
                     </template>
                   </div>
                   <div class="work-info">
@@ -202,6 +210,9 @@ watch([selectedCategory, selectedSubCategory], () => {
   filteredCategories.value.forEach(cat => {
     categoryPages.value[cat.id] = 1
   })
+  setTimeout(() => {
+    if (window.instgrm) window.instgrm.Embeds.process()
+  }, 300)
 })
 
 const totalCategories = computed(() => {
@@ -241,12 +252,14 @@ const filteredCategories = computed(() => {
       }
       mergedWorks.sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
       const isVertical = main.sub_categories && main.sub_categories.some(sub => sub.is_vertical)
+      const isInstagram = main.sub_categories && main.sub_categories.some(sub => sub.is_instagram)
       
       if (mergedWorks.length > 0 || categories.value.length === 1) {
         result.push({
           id: `main-${main.id}`,
           name: main.name,
           is_vertical: isVertical,
+          is_instagram: isInstagram,
           works: mergedWorks
         })
       }
@@ -311,6 +324,9 @@ const changePage = (categoryId, newPage) => {
     slideDirection.value = 'slide-right' // 이전 페이지: 오른쪽으로 밀려남
   }
   categoryPages.value[categoryId] = newPage
+  setTimeout(() => {
+    if (window.instgrm) window.instgrm.Embeds.process()
+  }, 300)
 }
 // ----------------------
 
@@ -347,6 +363,14 @@ const openVideo = (workId, url) => {
 }
 
 onMounted(async () => {
+  if (!document.getElementById('instagram-embed-script')) {
+    const script = document.createElement('script')
+    script.id = 'instagram-embed-script'
+    script.src = '//www.instagram.com/embed.js'
+    script.async = true
+    document.head.appendChild(script)
+  }
+
   windowWidth.value = window.innerWidth
   window.addEventListener('resize', handleResize)
 
@@ -356,9 +380,10 @@ onMounted(async () => {
     filteredCategories.value.forEach(cat => {
       categoryPages.value[cat.id] = 1
     })
-    // 렌더링 이후 스크롤 체크
+    // 렌더링 이후 스크롤 체크 및 인스타그램 임베드 처리
     setTimeout(() => {
       checkScroll()
+      if (window.instgrm) window.instgrm.Embeds.process()
     }, 100)
   } catch (error) {
     console.error('Failed to load works:', error)
@@ -626,6 +651,23 @@ onUnmounted(() => {
   .vertical-grid {
     grid-template-columns: repeat(2, 1fr);
   }
+}
+
+/* 인스타그램 그리드 (3열) */
+.instagram-grid {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.instagram-grid .thumbnail-wrapper {
+  padding-top: 0;
+  background-color: transparent;
+  min-height: 400px;
+}
+
+.instagram-embed-container {
+  width: 100%;
+  display: flex;
+  justify-content: center;
 }
 
 /* 작품 카드 UI */

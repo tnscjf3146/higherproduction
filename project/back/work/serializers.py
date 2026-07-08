@@ -25,7 +25,7 @@ class SubCategorySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = SubCategory
-        fields = ['id', 'name', 'order', 'is_vertical', 'works']
+        fields = ['id', 'name', 'main_category', 'order', 'is_vertical', 'is_instagram', 'works']
 
     def get_works(self, obj):
         works = obj.works.filter(is_visible=True).order_by('-created_at')

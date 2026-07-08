@@ -7,7 +7,8 @@ const activeTab = ref('brandClient')
 const brandClients = ref([])
 const projects = ref([])
 const works = ref([])
-const categories = ref([])
+const mainCategories = ref([])
+const subCategories = ref([])
 const inquiries = ref([])
 const siteSetting = ref({ 
   logo_kr: '', 
@@ -38,11 +39,13 @@ const siteSetting = ref({
 // 폼 상태
 const formBc = ref({ name: '', subtitle: '' })
 const formProject = ref({ title: '', subtitle: '', client: '' })
-const formCategory = ref({ name: '', subtitle: '', order: 0, is_vertical: false })
+const formMainCategory = ref({ name: '', order: 0 })
+const formSubCategory = ref({ name: '', main_category: '', order: 0, is_vertical: false, is_instagram: false })
 const formWork = ref({ 
   title: '', 
-  category: '', 
+  sub_category: '', 
   youtube_link: '', 
+  instagram_embed: '',
   content: '',
   status: 'IN_PROGRESS', 
   is_visible: true,
@@ -50,8 +53,11 @@ const formWork = ref({
 })
 
 // 카테고리 인라인 수정 상태
-const editingCategoryId = ref(null)
-const editingCategoryData = ref({ id: null, name: '', subtitle: '', order: 0, is_vertical: false })
+const editingMainCategoryId = ref(null)
+const editingMainCategoryData = ref({ id: null, name: '', order: 0 })
+
+const editingSubCategoryId = ref(null)
+const editingSubCategoryData = ref({ id: null, name: '', main_category: '', order: 0, is_vertical: false, is_instagram: false })
 
 // 브랜드 클라이언트 인라인 수정 상태
 const editingBrandClientId = ref(null)
@@ -159,9 +165,14 @@ const loadWorks = async () => {
     works.value = await $fetch(useRuntimeConfig().public.apiBaseUrl + '/work/admin/works/')
   } catch (e) { console.error(e) }
 }
-const loadCategories = async () => {
+const loadMainCategories = async () => {
   try {
-    categories.value = await $fetch(useRuntimeConfig().public.apiBaseUrl + '/work/admin/categories/')
+    mainCategories.value = await $fetch(useRuntimeConfig().public.apiBaseUrl + '/work/admin/main-categories/')
+  } catch (e) { console.error(e) }
+}
+const loadSubCategories = async () => {
+  try {
+    subCategories.value = await $fetch(useRuntimeConfig().public.apiBaseUrl + '/work/admin/sub-categories/')
   } catch (e) { console.error(e) }
 }
 const loadInquiries = async () => {
@@ -220,7 +231,8 @@ onMounted(() => {
   loadBrandClients()
   loadProjects()
   loadWorks()
-  loadCategories()
+  loadMainCategories()
+  loadSubCategories()
   loadInquiries()
   loadSiteSetting()
   loadPlanTypes()
@@ -289,68 +301,90 @@ const saveBrandClient = async () => {
   }
 }
 
-// 카테고리 추가/삭제
-const addCategory = async () => {
-  if (!formCategory.value.name) return alert('카테고리명을 입력해주세요.')
+// 대분류 관리
+const addMainCategory = async () => {
+  if (!formMainCategory.value.name) return alert('대분류명을 입력해주세요.')
   try {
-    await $fetch(useRuntimeConfig().public.apiBaseUrl + '/work/admin/categories/', {
+    await $fetch(useRuntimeConfig().public.apiBaseUrl + '/work/admin/main-categories/', {
+      method: 'POST',
+      body: { name: formMainCategory.value.name, order: formMainCategory.value.order || 0 }
+    })
+    formMainCategory.value = { name: '', order: 0 }
+    alert('대분류가 추가되었습니다.')
+    loadMainCategories()
+  } catch (e) { console.error(e); alert('추가 실패') }
+}
+const startEditingMainCategory = (cat) => {
+  editingMainCategoryId.value = cat.id
+  editingMainCategoryData.value = { id: cat.id, name: cat.name, order: cat.order }
+}
+const saveMainCategory = async () => {
+  try {
+    await $fetch(`${useRuntimeConfig().public.apiBaseUrl}/work/admin/main-categories/${editingMainCategoryData.value.id}/`, {
+      method: 'PATCH',
+      body: { name: editingMainCategoryData.value.name, order: editingMainCategoryData.value.order }
+    })
+    editingMainCategoryId.value = null
+    loadMainCategories()
+  } catch (e) { console.error(e); alert('수정 실패') }
+}
+const deleteMainCategory = async (id) => {
+  if (!confirm('대분류를 삭제하면 하위 중분류도 삭제될 수 있습니다. 진행할까요?')) return
+  await $fetch(`${useRuntimeConfig().public.apiBaseUrl}/work/admin/main-categories/${id}/`, { method: 'DELETE' })
+  loadMainCategories()
+  loadSubCategories()
+}
+
+// 중분류 관리
+const addSubCategory = async () => {
+  if (!formSubCategory.value.name || !formSubCategory.value.main_category) return alert('대분류와 중분류명을 모두 입력/선택해주세요.')
+  try {
+    await $fetch(useRuntimeConfig().public.apiBaseUrl + '/work/admin/sub-categories/', {
       method: 'POST',
       body: { 
-        name: formCategory.value.name,
-        subtitle: formCategory.value.subtitle || '',
-        order: formCategory.value.order || 0,
-        is_vertical: formCategory.value.is_vertical || false
+        name: formSubCategory.value.name,
+        main_category: formSubCategory.value.main_category,
+        order: formSubCategory.value.order || 0,
+        is_vertical: formSubCategory.value.is_vertical || false,
+        is_instagram: formSubCategory.value.is_instagram || false
       }
     })
-    formCategory.value = { name: '', subtitle: '', order: 0, is_vertical: false }
-    alert('카테고리가 성공적으로 추가되었습니다.')
-    loadCategories()
-  } catch (e) {
-    console.error(e)
-    alert('추가 실패')
-  }
+    formSubCategory.value = { name: '', main_category: '', order: 0, is_vertical: false, is_instagram: false }
+    alert('중분류가 추가되었습니다.')
+    loadSubCategories()
+  } catch (e) { console.error(e); alert('추가 실패') }
 }
-
-const startEditingCategory = (cat) => {
-  editingCategoryId.value = cat.id
-  editingCategoryData.value = { 
+const startEditingSubCategory = (cat) => {
+  editingSubCategoryId.value = cat.id
+  editingSubCategoryData.value = { 
     id: cat.id, 
     name: cat.name, 
-    subtitle: cat.subtitle,
+    main_category: cat.main_category,
     order: cat.order, 
-    is_vertical: cat.is_vertical 
+    is_vertical: cat.is_vertical,
+    is_instagram: cat.is_instagram
   }
 }
-
-const cancelEditingCategory = () => {
-  editingCategoryId.value = null
-}
-
-const saveCategory = async () => {
+const saveSubCategory = async () => {
   try {
-    await $fetch(`${useRuntimeConfig().public.apiBaseUrl}/work/admin/categories/${editingCategoryData.value.id}/`, {
+    await $fetch(`${useRuntimeConfig().public.apiBaseUrl}/work/admin/sub-categories/${editingSubCategoryData.value.id}/`, {
       method: 'PATCH',
       body: { 
-        name: editingCategoryData.value.name,
-        subtitle: editingCategoryData.value.subtitle || '',
-        order: editingCategoryData.value.order,
-        is_vertical: editingCategoryData.value.is_vertical
+        name: editingSubCategoryData.value.name,
+        main_category: editingSubCategoryData.value.main_category,
+        order: editingSubCategoryData.value.order,
+        is_vertical: editingSubCategoryData.value.is_vertical,
+        is_instagram: editingSubCategoryData.value.is_instagram
       }
     })
-    alert('카테고리가 성공적으로 수정되었습니다.')
-    editingCategoryId.value = null
-    loadCategories()
-  } catch (e) {
-    console.error(e)
-    alert('카테고리 수정에 실패했습니다.')
-    loadCategories()
-  }
+    editingSubCategoryId.value = null
+    loadSubCategories()
+  } catch (e) { console.error(e); alert('수정 실패') }
 }
-
-const deleteCategory = async (id) => {
-  if (!confirm('정말 삭제하시겠습니까? 관련 영상의 카테고리가 비워질 수 있습니다.')) return
-  await $fetch(`${useRuntimeConfig().public.apiBaseUrl}/work/admin/categories/${id}/`, { method: 'DELETE' })
-  loadCategories()
+const deleteSubCategory = async (id) => {
+  if (!confirm('정말 삭제하시겠습니까? 관련된 영상이 안 보일 수 있습니다.')) return
+  await $fetch(`${useRuntimeConfig().public.apiBaseUrl}/work/admin/sub-categories/${id}/`, { method: 'DELETE' })
+  loadSubCategories()
 }
 
 const addProject = async () => {
@@ -463,7 +497,7 @@ const selectYoutubeResult = (result) => {
 // 최종 영상(Work) 추가
 const addWork = async () => {
   if (!formWork.value.title) return alert('작품명(제목)을 입력해주세요. (유튜브 정보 불러오기를 추천합니다)')
-  if (!formWork.value.category) return alert('카테고리를 선택해주세요.')
+  if (!formWork.value.sub_category) return alert('카테고리(중분류)를 선택해주세요.')
   
   try {
     await $fetch(useRuntimeConfig().public.apiBaseUrl + '/work/admin/works/', {
@@ -471,14 +505,15 @@ const addWork = async () => {
       body: { 
         title: formWork.value.title,
         youtube_link: formWork.value.youtube_link || null,
-        category: formWork.value.category,
+        instagram_embed: formWork.value.instagram_embed || null,
+        sub_category: formWork.value.sub_category,
         content: formWork.value.content || '',
         status: formWork.value.status,
         is_visible: formWork.value.is_visible
       }
     })
     // 초기화
-    formWork.value = { title: '', category: '', youtube_link: '', content: '', status: 'IN_PROGRESS', is_visible: true, thumbnail_url: '' }
+    formWork.value = { title: '', sub_category: '', youtube_link: '', instagram_embed: '', content: '', status: 'IN_PROGRESS', is_visible: true, thumbnail_url: '' }
     alert('최종 영상이 성공적으로 추가되었습니다.')
     loadWorks()
   } catch (e) {
@@ -1027,6 +1062,14 @@ const saveSiteSetting = async () => {
               </div>
             </div>
 
+            <!-- 인스타그램 퍼가기 코드 입력부 추가 -->
+            <div class="form-row" style="margin-bottom: 15px;">
+              <div class="form-group flex-1">
+                <label>인스타그램 퍼가기 코드 (HTML)</label>
+                <textarea v-model="formWork.instagram_embed" rows="3" placeholder="인스타그램 게시물에서 '퍼가기' 버튼을 눌러 복사한 HTML 코드를 붙여넣으세요. 유튜브 링크와 함께 입력된 경우 인스타그램 카드가 우선 표시됩니다."></textarea>
+              </div>
+            </div>
+
             <!-- 미리보기 썸네일 -->
             <div v-if="formWork.thumbnail_url" style="margin-bottom: 15px;">
               <img :src="formWork.thumbnail_url" alt="미리보기" style="max-height: 150px; border-radius: 8px; border: 1px solid #ddd;" />
@@ -1039,10 +1082,14 @@ const saveSiteSetting = async () => {
                 <input v-model="formWork.title" type="text" placeholder="작품명 입력 (유튜브 연동 시 자동 입력됨)" />
               </div>
               <div class="form-group flex-1">
-                <label>카테고리 *</label>
-                <select v-model="formWork.category">
+                <label>소속 중분류(카테고리) *</label>
+                <select v-model="formWork.sub_category">
                   <option value="">카테고리 선택</option>
-                  <option v-for="cat in categories" :key="cat.id" :value="cat.id">{{ cat.name }}</option>
+                  <optgroup v-for="mc in mainCategories" :key="'mc-'+mc.id" :label="mc.name">
+                    <option v-for="sc in subCategories.filter(s => s.main_category === mc.id)" :key="'sc-'+sc.id" :value="sc.id">
+                      {{ sc.name }}
+                    </option>
+                  </optgroup>
                 </select>
               </div>
             </div>
@@ -1088,7 +1135,7 @@ const saveSiteSetting = async () => {
               <tbody>
                 <tr v-for="w in works" :key="w.id">
                   <td>{{ w.id }}</td>
-                  <td>{{ w.category_name || '-' }}</td>
+                  <td>{{ w.sub_category_name || '-' }}</td>
                   <td>
                     <span v-if="w.youtube_link" @click="playVideo(w.youtube_link)" style="color:#1a3ae0; font-weight:600; cursor:pointer; text-decoration:underline;">
                       ▶ {{ w.title }}
